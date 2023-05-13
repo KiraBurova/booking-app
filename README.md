@@ -2,7 +2,7 @@
 
 Initial description of a project
 
-Use can:
+User can:
 
 - add any timezones to a list
 - get list of all previously added timezones
