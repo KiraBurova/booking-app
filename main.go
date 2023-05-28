@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -16,6 +17,7 @@ func handleRequests() {
 	myRouter := mux.NewRouter().StrictSlash(true)
 	myRouter.HandleFunc("/timezones", listTimezones)
 	myRouter.HandleFunc("/timezone", addTimezone).Methods("POST")
+	myRouter.HandleFunc("/convert_timezone", convertTimezone).Methods("POST")
 	log.Fatal(http.ListenAndServe(":10000", myRouter))
 }
 
@@ -23,13 +25,6 @@ func main() {
 	Timezones = []string{"Europe/Berlin", "Africa/Abidjan", "Africa/Addis_Ababa"}
 
 	handleRequests()
-}
-
-func getCurrentTimezone() string {
-	t := time.Now()
-	zone, _ := t.Zone()
-
-	return zone
 }
 
 func addTimezone(w http.ResponseWriter, r *http.Request) {
@@ -46,7 +41,12 @@ func listTimezones(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(Timezones)
 
 }
-func convertTimezone() {
-	// get timezone getCurrentTimezone()
-	// convert to any timezone from the listTimezones()
+func convertTimezone(w http.ResponseWriter, r *http.Request) {
+	now := time.Now()
+
+	timezone, _ := ioutil.ReadAll(r.Body)
+
+	loc, _ := time.LoadLocation(string(timezone))
+
+	fmt.Printf("Time in %v: %s\n", string(timezone), now.In(loc))
 }
