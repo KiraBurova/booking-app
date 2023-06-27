@@ -22,6 +22,7 @@ func handleRequests() {
 	myRouter.HandleFunc("/convert_timezone", convertTimezone).Methods("POST")
 
 	myRouter.HandleFunc("/register", register).Methods("POST")
+	myRouter.HandleFunc("/bookTime", bookTime).Methods("POST")
 	log.Fatal(http.ListenAndServe(":10000", myRouter))
 }
 
@@ -34,8 +35,9 @@ func main() {
 
 /* USER */
 type User struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Username  string   `json:"username"`
+	Password  string   `json:"password"`
+	Timeslots []string `json:"timeslots"`
 }
 
 const create string = `create table users(username text, password text);`
@@ -68,6 +70,12 @@ func register(w http.ResponseWriter, r *http.Request) {
 	id, _ := res.LastInsertId()
 
 	fmt.Println(id)
+}
+
+// book a timeslot
+
+func bookTime(w http.ResponseWriter, r *http.Request) {
+
 }
 
 /* TIMEZONES */
