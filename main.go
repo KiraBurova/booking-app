@@ -34,11 +34,12 @@ func main() {
 
 /* USER */
 type User struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Username  string         `json:"username"`
+	Password  string         `json:"password"`
+	Timeslots map[string]int `json:"timeslots"`
 }
 
-const create string = `create table users(username text, password text);`
+const create string = `create table users(username text, password text, timeslots text);`
 
 func createDb() error {
 	db, err := sql.Open("sqlite3", "./users.db")
@@ -59,9 +60,10 @@ func register(w http.ResponseWriter, r *http.Request) {
 
 	db, _ := sql.Open("sqlite3", "./users.db")
 
-	stmt, _ := db.Prepare("INSERT INTO users(username, password) values(?,?)")
+	stmt, _ := db.Prepare("INSERT INTO users(username, password, timeslots) values(?,?,?)")
 
-	res, _ := stmt.Exec(u.Username, u.Password)
+	// TODO: create map of timeslots
+	res, _ := stmt.Exec(u.Username, u.Password, nil)
 
 	id, _ := res.LastInsertId()
 
