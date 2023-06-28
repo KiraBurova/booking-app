@@ -22,7 +22,6 @@ func handleRequests() {
 	myRouter.HandleFunc("/convert_timezone", convertTimezone).Methods("POST")
 
 	myRouter.HandleFunc("/register", register).Methods("POST")
-	myRouter.HandleFunc("/bookTime", bookTime).Methods("POST")
 	log.Fatal(http.ListenAndServe(":10000", myRouter))
 }
 
@@ -35,9 +34,8 @@ func main() {
 
 /* USER */
 type User struct {
-	Username  string   `json:"username"`
-	Password  string   `json:"password"`
-	Timeslots []string `json:"timeslots"`
+	Username string `json:"username"`
+	Password string `json:"password"`
 }
 
 const create string = `create table users(username text, password text);`
@@ -59,8 +57,6 @@ func register(w http.ResponseWriter, r *http.Request) {
 
 	json.NewDecoder(r.Body).Decode(&u)
 
-	json.NewEncoder(w).Encode(u)
-
 	db, _ := sql.Open("sqlite3", "./users.db")
 
 	stmt, _ := db.Prepare("INSERT INTO users(username, password) values(?,?)")
@@ -70,12 +66,8 @@ func register(w http.ResponseWriter, r *http.Request) {
 	id, _ := res.LastInsertId()
 
 	fmt.Println(id)
-}
 
-// book a timeslot
-
-func bookTime(w http.ResponseWriter, r *http.Request) {
-
+	json.NewEncoder(w).Encode(u)
 }
 
 /* TIMEZONES */
