@@ -22,6 +22,8 @@ func handleRequests() {
 	myRouter.HandleFunc("/convert_timezone", convertTimezone).Methods("POST")
 
 	myRouter.HandleFunc("/register", register).Methods("POST")
+	myRouter.HandleFunc("/book_time", bookTime).Methods("POST")
+
 	log.Fatal(http.ListenAndServe(":10000", myRouter))
 }
 
@@ -88,6 +90,11 @@ func register(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(id)
 
 	json.NewEncoder(w).Encode(u)
+}
+
+// TODO: function to book a timeslot
+func bookTime(w http.ResponseWriter, r *http.Request) {
+
 }
 
 /* TIMEZONES */
