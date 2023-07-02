@@ -32,14 +32,18 @@ func main() {
 	handleRequests()
 }
 
-/* USER */
-type User struct {
-	Username  string         `json:"username"`
-	Password  string         `json:"password"`
-	Timeslots map[string]int `json:"timeslots"`
+type TimeslotStatus struct {
+	Booked bool `json:"booked"`
 }
 
-const create string = `create table users(username text, password text, timeslots text);`
+/* USER */
+type User struct {
+	Username  string                    `json:"username"`
+	Password  string                    `json:"password"`
+	Timeslots map[string]TimeslotStatus `json:"timeslots"`
+}
+
+const create string = `create table users(username text, password text, timeslots blob);`
 
 func createDb() error {
 	db, err := sql.Open("sqlite3", "./users.db")
@@ -56,14 +60,28 @@ func register(w http.ResponseWriter, r *http.Request) {
 	// get posted data for user and store into db
 	var u User
 
+	defaultTimeslots := map[string]TimeslotStatus{
+		"9:00":  {Booked: false},
+		"10:00": {Booked: false},
+		"11:00": {Booked: false},
+		"12:00": {Booked: false},
+		"13:00": {Booked: false},
+		"14:00": {Booked: false},
+		"15:00": {Booked: false},
+		"16:00": {Booked: false},
+	}
+
+	u.Timeslots = defaultTimeslots
+
+	jsonWithTimeslots, _ := json.Marshal(defaultTimeslots)
+
 	json.NewDecoder(r.Body).Decode(&u)
 
 	db, _ := sql.Open("sqlite3", "./users.db")
 
 	stmt, _ := db.Prepare("INSERT INTO users(username, password, timeslots) values(?,?,?)")
 
-	// TODO: create map of timeslots
-	res, _ := stmt.Exec(u.Username, u.Password, nil)
+	res, _ := stmt.Exec(u.Username, u.Password, jsonWithTimeslots)
 
 	id, _ := res.LastInsertId()
 
