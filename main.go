@@ -105,7 +105,6 @@ func addTimezone(w http.ResponseWriter, r *http.Request) {
 	// set new timezone to timezones array
 	Timezones = append(Timezones, string(timezone))
 
-	fmt.Println(Timezones)
 	json.NewEncoder(w).Encode(timezone)
 }
 func listTimezones(w http.ResponseWriter, r *http.Request) {
