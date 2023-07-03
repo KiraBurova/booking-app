@@ -45,7 +45,7 @@ type User struct {
 	Timeslots map[string]TimeslotStatus `json:"timeslots"`
 }
 
-const create string = `create table users(username text, password text, timeslots blob);`
+const create string = `create table users(id integer primary key autoincrement, username text, password text, timeslots blob);`
 
 func createDb() error {
 	db, err := sql.Open("sqlite3", "./users.db")
