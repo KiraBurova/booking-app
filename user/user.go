@@ -37,10 +37,11 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	jsonWithTimeslots, _ := json.Marshal(defaultTimeslots)
 	json.NewDecoder(r.Body).Decode(&u)
 
-	// // TODO: probably need to replace any with something
-	args := []any{u.Username, u.Password, jsonWithTimeslots}
-	db.Db_instance.Exec("INSERT INTO users(username, password, timeslots) values(?,?,?)", args...)
-
+	db.Db_instance.Exec("INSERT INTO users(username, password, timeslots) values(?,?,?)",
+		u.Username,
+		u.Password,
+		jsonWithTimeslots,
+	)
 	json.NewEncoder(w).Encode(u)
 }
 
