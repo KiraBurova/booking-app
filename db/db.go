@@ -2,22 +2,25 @@ package db
 
 import (
 	"database/sql"
+	"log"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
-const create string = `create table users(id integer primary key autoincrement, username text, password text, timeslots blob);`
+const create string = `CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, password TEXT, timeslots BLOB);`
 
 var DbInstance *sql.DB
 
-func InitDb() error {
+func InitDb() {
+
 	db, err := sql.Open("sqlite3", "./db/users.db")
+
 	if err != nil {
-		return err
+		log.Fatal(err)
 	}
 	if _, err := db.Exec(create); err != nil {
-		return err
+		log.Fatal(err)
 	}
+
 	DbInstance = db
-	return nil
 }

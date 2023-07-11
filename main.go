@@ -18,7 +18,12 @@ func handleRequests() {
 	myRouter.HandleFunc("/register", user.Register).Methods("POST")
 	myRouter.HandleFunc("/book_time/{userId}", user.BookTime).Methods("POST")
 
-	log.Fatal(http.ListenAndServe(":10000", myRouter))
+	err := http.ListenAndServe(":10000", myRouter)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
 }
 
 func main() {

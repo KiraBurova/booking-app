@@ -2,6 +2,7 @@ package user
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"timezone-converter/db"
 
@@ -34,7 +35,12 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	u.Timeslots = defaultTimeslots
-	jsonWithTimeslots, _ := json.Marshal(defaultTimeslots)
+	jsonWithTimeslots, err := json.Marshal(defaultTimeslots)
+
+	if err != nil {
+		log.Panic(err)
+	}
+
 	json.NewDecoder(r.Body).Decode(&u)
 
 	db.DbInstance.Exec("INSERT INTO users(username, password, timeslots) values(?,?,?)",
