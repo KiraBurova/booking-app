@@ -1,15 +1,8 @@
-package main
+package user
 
 import (
 	"testing"
 )
-
-// func TestAddTimezone(t *testing.T) {
-// w := httptest.NewRecorder()
-// r := httptest.NewRequest(http.MethodPost, "/timezone", strings.NewReader("Test/Timezone"))
-
-// 	addTimezone(w, r)
-// }
 
 func TestRegister(t *testing.T) {
 	// read input from payload
@@ -22,9 +15,5 @@ func TestRegister(t *testing.T) {
 	// 	response := httptest.NewRecorder()
 
 	// 	register(response, request)
-
-	// 	fmt.Println(response.Body)
-
 	// })
-
 }
