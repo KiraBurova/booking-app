@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"timezone-converter/db"
 )
 
 func TestRegister(t *testing.T) {
@@ -14,6 +15,8 @@ func TestRegister(t *testing.T) {
 	// insert into db
 
 	t.Run("register user", func(t *testing.T) {
+
+		db.InitDb()
 
 		user := &User{
 			Username: "username",
@@ -27,6 +30,6 @@ func TestRegister(t *testing.T) {
 
 		Register(response, request)
 
-		// TODO: test fails here with runtime error: invalid memory address or nil pointer dereference
+		// TODO: continue test
 	})
 }
