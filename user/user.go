@@ -37,7 +37,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	jsonWithTimeslots, _ := json.Marshal(defaultTimeslots)
 	json.NewDecoder(r.Body).Decode(&u)
 
-	db.Db_instance.Exec("INSERT INTO users(username, password, timeslots) values(?,?,?)",
+	db.DbInstance.Exec("INSERT INTO users(username, password, timeslots) values(?,?,?)",
 		u.Username,
 		u.Password,
 		jsonWithTimeslots,
@@ -48,7 +48,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 func BookTime(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	userId := params["userId"]
-	row := db.Db_instance.QueryRow("SELECT * FROM users WHERE id=?", userId)
+	row := db.DbInstance.QueryRow("SELECT * FROM users WHERE id=?", userId)
 	user := User{}
 	row.Scan(&user.Id, &user.Username, &user.Password, &user.Timeslots)
 

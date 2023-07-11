@@ -8,7 +8,7 @@ import (
 
 const create string = `create table users(id integer primary key autoincrement, username text, password text, timeslots blob);`
 
-var Db_instance *sql.DB
+var DbInstance *sql.DB
 
 func InitDb() error {
 	db, err := sql.Open("sqlite3", "./db/users.db")
@@ -18,6 +18,6 @@ func InitDb() error {
 	if _, err := db.Exec(create); err != nil {
 		return err
 	}
-	Db_instance = db
+	DbInstance = db
 	return nil
 }
