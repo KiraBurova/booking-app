@@ -11,8 +11,8 @@ type ConnectDB struct {
 	db *sql.DB
 }
 
-func (d *ConnectDB) exec(query string, args any) {
-	d.db.Exec(query, args)
+func (d *ConnectDB) exec(query string, username string, password string, timeslots any) {
+	d.db.Exec(query, username, password, timeslots)
 }
 
 func (d *ConnectDB) queryRow(query string, args any) User {

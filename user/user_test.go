@@ -3,6 +3,7 @@ package user
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -10,17 +11,13 @@ import (
 )
 
 func TestRegister(t *testing.T) {
-	// read input from payload
-	// add default timeslots
-	// insert into db
-
 	t.Run("register user", func(t *testing.T) {
-
 		db.InitDb()
+		db := ConnectDB{db: db.DbInstance}
 
 		user := &User{
-			Username: "username",
-			Password: "password",
+			Username: "user_created_from_test",
+			Password: "user_created_from_test",
 		}
 		payloadBuf := new(bytes.Buffer)
 		json.NewEncoder(payloadBuf).Encode(user)
@@ -30,6 +27,8 @@ func TestRegister(t *testing.T) {
 
 		Register(response, request)
 
-		// TODO: continue test
+		row := db.queryRow("SELECT * FROM users WHERE username=?", "user_created_from_test")
+
+		fmt.Println(row)
 	})
 }

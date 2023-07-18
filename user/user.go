@@ -44,9 +44,8 @@ func Register(w http.ResponseWriter, r *http.Request) {
 
 	json.NewDecoder(r.Body).Decode(&u)
 
-	args := []any{u.Username, u.Password, jsonWithTimeslots}
 	db.exec("INSERT INTO users(username, password, timeslots) values(?,?,?)",
-		args,
+		u.Username, u.Password, jsonWithTimeslots,
 	)
 
 	json.NewEncoder(w).Encode(u)
