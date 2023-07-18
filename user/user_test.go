@@ -29,6 +29,7 @@ func TestRegister(t *testing.T) {
 
 		row := db.queryRow("SELECT * FROM users WHERE username=?", "user_created_from_test")
 
+		// for now
 		fmt.Println(row)
 	})
 }

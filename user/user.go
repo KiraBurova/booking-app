@@ -58,6 +58,7 @@ func BookTime(w http.ResponseWriter, r *http.Request) {
 	userId := params["userId"]
 	user := db.queryRow("SELECT * FROM users WHERE id=?", userId)
 
+	// for now
 	fmt.Println(user)
 
 	// TODO: Timeslots seems to be empty there, figure out why

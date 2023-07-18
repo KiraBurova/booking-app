@@ -13,7 +13,7 @@ var DbInstance *sql.DB
 
 func InitDb() {
 
-	db, err := sql.Open("sqlite3", "./users.db")
+	db, err := sql.Open("sqlite3", "db/users.db")
 
 	if err != nil {
 		log.Fatal(err)
