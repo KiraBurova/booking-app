@@ -12,7 +12,7 @@ import (
 
 func TestRegister(t *testing.T) {
 	t.Run("register user", func(t *testing.T) {
-		db.InitDb()
+		db.InitDb("testUsers.db")
 		db := ConnectDB{db: db.DbInstance}
 
 		user := &User{
