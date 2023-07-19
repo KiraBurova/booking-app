@@ -27,6 +27,6 @@ func handleRequests() {
 }
 
 func main() {
-	db.InitDb()
+	db.InitDb("users.db")
 	handleRequests()
 }

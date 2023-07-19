@@ -2,6 +2,7 @@ package user
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"timezone-converter/db"
@@ -21,6 +22,7 @@ type TimeslotStatus struct {
 }
 
 func Register(w http.ResponseWriter, r *http.Request) {
+	db := ConnectDB{db: db.DbInstance}
 	// get posted data for user and store into db
 	var u User
 	defaultTimeslots := map[string]TimeslotStatus{
@@ -33,7 +35,6 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		"15:00": {Booked: false},
 		"16:00": {Booked: false},
 	}
-
 	u.Timeslots = defaultTimeslots
 	jsonWithTimeslots, err := json.Marshal(defaultTimeslots)
 
@@ -43,20 +44,22 @@ func Register(w http.ResponseWriter, r *http.Request) {
 
 	json.NewDecoder(r.Body).Decode(&u)
 
-	db.DbInstance.Exec("INSERT INTO users(username, password, timeslots) values(?,?,?)",
-		u.Username,
-		u.Password,
-		jsonWithTimeslots,
+	db.exec("INSERT INTO users(username, password, timeslots) values(?,?,?)",
+		u.Username, u.Password, jsonWithTimeslots,
 	)
+
 	json.NewEncoder(w).Encode(u)
 }
 
 func BookTime(w http.ResponseWriter, r *http.Request) {
+	db := ConnectDB{db: db.DbInstance}
+
 	params := mux.Vars(r)
 	userId := params["userId"]
-	row := db.DbInstance.QueryRow("SELECT * FROM users WHERE id=?", userId)
-	user := User{}
-	row.Scan(&user.Id, &user.Username, &user.Password, &user.Timeslots)
+	user := db.queryRow("SELECT * FROM users WHERE id=?", userId)
+
+	// for now
+	fmt.Println(user)
 
 	// TODO: Timeslots seems to be empty there, figure out why
 }

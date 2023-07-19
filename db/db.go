@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -11,9 +12,9 @@ const create string = `CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY A
 
 var DbInstance *sql.DB
 
-func InitDb() {
+func InitDb(dbName string) {
 
-	db, err := sql.Open("sqlite3", "./users.db")
+	db, err := sql.Open("sqlite3", fmt.Sprintf("./%s", dbName))
 
 	if err != nil {
 		log.Fatal(err)
