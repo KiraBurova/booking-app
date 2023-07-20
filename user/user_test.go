@@ -3,19 +3,21 @@ package user
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"timezone-converter/db"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestRegister(t *testing.T) {
 	t.Run("register user", func(t *testing.T) {
 		db.InitDb("testUsers.db")
-		db := ConnectDB{db: db.DbInstance}
+		repo := NewRepository(db.DbInstance)
 
 		user := &User{
+			Id:       "1",
 			Username: "user_created_from_test",
 			Password: "user_created_from_test",
 		}
@@ -27,9 +29,12 @@ func TestRegister(t *testing.T) {
 
 		Register(response, request)
 
-		row := db.queryRow("SELECT * FROM users WHERE username=?", "user_created_from_test")
+		row, err := repo.GetById("1")
 
-		// for now
-		fmt.Println(row)
+		if err != nil {
+			t.Fail()
+		}
+
+		assert.Equal(t, row.Id, "1", "User with id equal to 1 shoudl be returned")
 	})
 }

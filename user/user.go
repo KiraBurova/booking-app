@@ -11,10 +11,10 @@ import (
 )
 
 type User struct {
-	Id        string                    `json:"id"`
-	Username  string                    `json:"username"`
-	Password  string                    `json:"password"`
-	Timeslots map[string]TimeslotStatus `json:"timeslots"`
+	Id        string `json:"id"`
+	Username  string `json:"username"`
+	Password  string `json:"password"`
+	Timeslots string `json:"timeslots"`
 }
 
 type TimeslotStatus struct {
@@ -22,10 +22,10 @@ type TimeslotStatus struct {
 }
 
 func Register(w http.ResponseWriter, r *http.Request) {
-	db := ConnectDB{db: db.DbInstance}
-	// get posted data for user and store into db
+	repo := NewRepository(db.DbInstance)
+
 	var u User
-	defaultTimeslots := map[string]TimeslotStatus{
+	defaultTimeslots := `{
 		"9:00":  {Booked: false},
 		"10:00": {Booked: false},
 		"11:00": {Booked: false},
@@ -34,29 +34,30 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		"14:00": {Booked: false},
 		"15:00": {Booked: false},
 		"16:00": {Booked: false},
-	}
+	}`
 	u.Timeslots = defaultTimeslots
-	jsonWithTimeslots, err := json.Marshal(defaultTimeslots)
+
+	json.NewDecoder(r.Body).Decode(&u)
+
+	err := repo.Create(u)
 
 	if err != nil {
 		log.Panic(err)
 	}
 
-	json.NewDecoder(r.Body).Decode(&u)
-
-	db.exec("INSERT INTO users(username, password, timeslots) values(?,?,?)",
-		u.Username, u.Password, jsonWithTimeslots,
-	)
-
 	json.NewEncoder(w).Encode(u)
 }
 
 func BookTime(w http.ResponseWriter, r *http.Request) {
-	db := ConnectDB{db: db.DbInstance}
+	repo := NewRepository(db.DbInstance)
 
 	params := mux.Vars(r)
 	userId := params["userId"]
-	user := db.queryRow("SELECT * FROM users WHERE id=?", userId)
+	user, err := repo.GetById(userId)
+
+	if err != nil {
+		log.Panic(err)
+	}
 
 	// for now
 	fmt.Println(user)
