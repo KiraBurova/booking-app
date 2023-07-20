@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"timezone-converter/db"
 
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 )
 
@@ -36,6 +37,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		"16:00": {Booked: false},
 	}`
 	u.Timeslots = defaultTimeslots
+	u.Id = uuid.NewString()
 
 	json.NewDecoder(r.Body).Decode(&u)
 
@@ -53,6 +55,7 @@ func BookTime(w http.ResponseWriter, r *http.Request) {
 
 	params := mux.Vars(r)
 	userId := params["userId"]
+
 	user, err := repo.GetById(userId)
 
 	if err != nil {

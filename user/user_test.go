@@ -17,7 +17,6 @@ func TestRegister(t *testing.T) {
 		repo := NewRepository(db.DbInstance)
 
 		user := &User{
-			Id:       "1",
 			Username: "user_created_from_test",
 			Password: "user_created_from_test",
 		}
@@ -29,12 +28,12 @@ func TestRegister(t *testing.T) {
 
 		Register(response, request)
 
-		row, err := repo.GetById("1")
+		row, err := repo.GetByUsername("user_created_from_test")
 
 		if err != nil {
 			t.Fail()
 		}
 
-		assert.Equal(t, row.Id, "1", "User with id equal to 1 should be returned")
+		assert.Equal(t, row.Username, "user_created_from_test", "User with username of user_created_from_test should be returned")
 	})
 }

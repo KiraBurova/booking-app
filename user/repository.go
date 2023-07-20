@@ -28,9 +28,9 @@ func NewRepository(db *sql.DB) *Repository {
 }
 
 func (r Repository) Create(user User) error {
-	query := "INSERT INTO users(username, password, timeslots) values(?,?,?)"
+	query := "INSERT INTO users(id, username, password, timeslots) values(?,?,?,?)"
 
-	_, err := db.DbInstance.Exec(query, user.Username, user.Password, user.Timeslots)
+	_, err := db.DbInstance.Exec(query, user.Id, user.Username, user.Password, user.Timeslots)
 
 	if err != nil {
 		return err
@@ -52,7 +52,21 @@ func (r Repository) GetById(id string) (User, error) {
 	}
 
 	return user, nil
+}
 
+func (r Repository) GetByUsername(id string) (User, error) {
+	user := User{}
+	query := "SELECT * FROM users WHERE username=?"
+
+	row := db.DbInstance.QueryRow(query, id)
+
+	err := row.Scan(&user.Id, &user.Username, &user.Password, &user.Timeslots)
+
+	if err != nil {
+		return user, err
+	}
+
+	return user, nil
 }
 
 func (r Repository) Update(id int, user User)     {}
