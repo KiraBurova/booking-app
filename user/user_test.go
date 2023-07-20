@@ -35,6 +35,6 @@ func TestRegister(t *testing.T) {
 			t.Fail()
 		}
 
-		assert.Equal(t, row.Id, "1", "User with id equal to 1 shoudl be returned")
+		assert.Equal(t, row.Id, "1", "User with id equal to 1 should be returned")
 	})
 }
