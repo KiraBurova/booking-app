@@ -26,6 +26,8 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	repo := NewRepository(db.DbInstance)
 
 	var u User
+	json.NewDecoder(r.Body).Decode(&u)
+
 	defaultTimeslots := `{
 		"9:00":  {Booked: false},
 		"10:00": {Booked: false},
@@ -37,9 +39,16 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		"16:00": {Booked: false},
 	}`
 	u.Timeslots = defaultTimeslots
+
 	u.Id = uuid.NewString()
 
-	json.NewDecoder(r.Body).Decode(&u)
+	hash, hashErr := HashPassowrd(u.Password)
+
+	if hashErr != nil {
+		log.Panic(hashErr)
+	}
+
+	u.Password = hash
 
 	err := repo.Create(u)
 
