@@ -2,7 +2,6 @@ package user
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"timezone-converter/db"
@@ -29,14 +28,14 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	json.NewDecoder(r.Body).Decode(&u)
 
 	defaultTimeslots := `{
-		"9:00":  {Booked: false},
-		"10:00": {Booked: false},
-		"11:00": {Booked: false},
-		"12:00": {Booked: false},
-		"13:00": {Booked: false},
-		"14:00": {Booked: false},
-		"15:00": {Booked: false},
-		"16:00": {Booked: false},
+		"9:00":  {"Booked": false},
+		"10:00": {"Booked": false},
+		"11:00": {"Booked": false},
+		"12:00": {"Booked": false},
+		"13:00": {"Booked": false},
+		"14:00": {"Booked": false},
+		"15:00": {"Booked": false},
+		"16:00": {"Booked": false}
 	}`
 	u.Timeslots = defaultTimeslots
 
@@ -71,8 +70,10 @@ func BookTime(w http.ResponseWriter, r *http.Request) {
 		log.Panic(err)
 	}
 
-	// for now
-	fmt.Println(user)
+	var timeSlots map[string]interface{}
+	err = json.Unmarshal([]byte(user.Timeslots), &timeSlots)
 
-	// TODO: Timeslots seems to be empty there, figure out why
+	if err != nil {
+		log.Panic(err)
+	}
 }
