@@ -2,7 +2,6 @@ package user
 
 import (
 	"database/sql"
-	"log"
 	"timezone-converter/db"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -21,9 +20,6 @@ type Repository struct {
 }
 
 func NewRepository(db *sql.DB) *Repository {
-	if db == nil {
-		log.Panic("DB was not created.")
-	}
 	return &Repository{db: db}
 }
 
@@ -54,11 +50,11 @@ func (r Repository) GetById(id string) (User, error) {
 	return user, nil
 }
 
-func (r Repository) GetByUsername(id string) (User, error) {
+func (r Repository) GetByUsername(username string) (User, error) {
 	user := User{}
 	query := "SELECT * FROM users WHERE username=?"
 
-	row := db.DbInstance.QueryRow(query, id)
+	row := db.DbInstance.QueryRow(query, username)
 
 	err := row.Scan(&user.Id, &user.Username, &user.Password, &user.Timeslots)
 
