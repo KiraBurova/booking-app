@@ -27,16 +27,8 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		"16:00": {"Booked": false}
 	}`
 	u.Timeslots = defaultTimeslots
-
 	u.Id = uuid.NewString()
-
-	hash, hashErr := u.hashPassword()
-
-	if hashErr != nil {
-		log.Panic(hashErr)
-	}
-
-	u.Password = hash
+	u.setPassword()
 
 	err := repo.Create(u)
 

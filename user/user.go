@@ -1,6 +1,10 @@
 package user
 
-import "golang.org/x/crypto/bcrypt"
+import (
+	"log"
+
+	"golang.org/x/crypto/bcrypt"
+)
 
 type User struct {
 	Id        string `json:"id"`
@@ -13,7 +17,12 @@ type TimeslotStatus struct {
 	Booked bool `json:"booked"`
 }
 
-func (u *User) hashPassword() (string, error) {
+func (u *User) setPassword() string {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(u.Password), 14)
-	return string(bytes), err
+
+	if err != nil {
+		log.Panic(err)
+	}
+
+	return string(bytes)
 }
