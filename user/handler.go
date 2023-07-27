@@ -30,7 +30,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 
 	u.Id = uuid.NewString()
 
-	hash, hashErr := hashPassowrd(u.Password)
+	hash, hashErr := u.hashPassword()
 
 	if hashErr != nil {
 		log.Panic(hashErr)
