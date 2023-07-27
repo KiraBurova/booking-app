@@ -3,17 +3,18 @@ package user
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"timezone-converter/db"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestRegister(t *testing.T) {
 	t.Run("register user", func(t *testing.T) {
 		db.InitDb("testUsers.db")
-		db := ConnectDB{db: db.DbInstance}
+		repo := NewRepository(db.DbInstance)
 
 		user := &User{
 			Username: "user_created_from_test",
@@ -27,9 +28,12 @@ func TestRegister(t *testing.T) {
 
 		Register(response, request)
 
-		row := db.queryRow("SELECT * FROM users WHERE username=?", "user_created_from_test")
+		row, err := repo.GetByUsername("user_created_from_test")
 
-		// for now
-		fmt.Println(row)
+		if err != nil {
+			t.Fail()
+		}
+
+		assert.Equal(t, row.Username, "user_created_from_test", "User with username of user_created_from_test should be returned")
 	})
 }
