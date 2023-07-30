@@ -11,8 +11,6 @@ import (
 )
 
 func Login(w http.ResponseWriter, r *http.Request) {
-	db.AttachDb(`ATTACH DATABASE 'sessions.db' as 'sessions'`)
-
 	userRepo := user.NewRepository(db.DbInstance)
 	authRepo := NewRepository(db.DbInstance)
 
@@ -34,7 +32,11 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 	sessionToken := uuid.NewString()
 
-	authRepo.Create(sessionToken)
+	createErr := authRepo.Create(sessionToken)
+
+	if createErr != nil {
+		log.Panic(createErr)
+	}
 
 	http.SetCookie(w, &http.Cookie{
 		Name:  "session_token",
@@ -52,7 +54,12 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 	}
 
-	authRepo.Delete(cookie.Value)
+	deleteErr := authRepo.Delete(cookie.Value)
+
+	if deleteErr != nil {
+		log.Panic(deleteErr)
+		w.WriteHeader(http.StatusBadRequest)
+	}
 
 	http.SetCookie(w, &http.Cookie{
 		Name:  "session_token",
