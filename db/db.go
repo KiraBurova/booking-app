@@ -25,3 +25,9 @@ func InitDb(dbName string) {
 
 	DbInstance = db
 }
+
+func AttachDb(attach string) {
+	if _, err := DbInstance.Exec(attach); err != nil {
+		log.Fatal(err)
+	}
+}

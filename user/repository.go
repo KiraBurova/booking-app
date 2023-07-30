@@ -7,13 +7,6 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-// type Repository interface {
-// 	Create(user User) (int, error)
-// 	Update(id int, user User) (User, error)
-// 	Delete(id int) error
-// 	UserExists(id int) (User, error)
-// 	GetById(id int) (User, error)
-// }
 
 type Repository struct {
 	db *sql.DB

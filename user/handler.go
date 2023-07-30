@@ -28,7 +28,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	}`
 	u.Timeslots = defaultTimeslots
 	u.Id = uuid.NewString()
-	u.setPassword()
+	u.Password = u.setPassword()
 
 	err := repo.Create(u)
 
