@@ -46,3 +46,21 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		Value: sessionToken,
 	})
 }
+
+func Logout(w http.ResponseWriter, r *http.Request) {
+	authRepo := NewRepository(db.DbInstance)
+
+	cookie, err := r.Cookie("session_token")
+
+	if err != nil {
+		log.Panic(err)
+		w.WriteHeader(http.StatusBadRequest)
+	}
+
+	authRepo.Delete(cookie.Value)
+
+	http.SetCookie(w, &http.Cookie{
+		Name:  "session_token",
+		Value: "",
+	})
+}

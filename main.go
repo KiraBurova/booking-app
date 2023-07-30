@@ -18,6 +18,7 @@ func handleRequests() {
 	myRouter.HandleFunc("/convert_timezone", timezone.ConvertTimezone).Methods("POST")
 	myRouter.HandleFunc("/register", user.Register).Methods("POST")
 	myRouter.HandleFunc("/login", auth.Login).Methods("POST")
+	myRouter.HandleFunc("/logout", auth.Logout).Methods("POST")
 	myRouter.HandleFunc("/book_time/{userId}", user.BookTime).Methods("POST")
 
 	err := http.ListenAndServe(":10000", myRouter)

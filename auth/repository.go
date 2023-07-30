@@ -24,3 +24,15 @@ func (r Repository) Create(token string) error {
 
 	return nil
 }
+
+func (r Repository) Delete(token string) error {
+	query := "DELETE FROM sessions WHERE token=?"
+
+	_, err := db.DbInstance.Exec(query)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

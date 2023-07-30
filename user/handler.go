@@ -34,6 +34,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 
 	if userExists == true {
 		log.Panic(userExistsError)
+		w.WriteHeader(http.StatusConflict)
 	} else {
 		err := repo.Create(u)
 
