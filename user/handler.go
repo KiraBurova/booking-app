@@ -30,13 +30,20 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	u.Id = uuid.NewString()
 	u.Password = u.setPassword()
 
-	err := repo.Create(u)
+	userExists, userExistsError := repo.UserExists(u.Username)
 
-	if err != nil {
-		log.Panic(err)
+	if userExists == true {
+		log.Panic(userExistsError)
+	} else {
+		err := repo.Create(u)
+
+		if err != nil {
+			log.Panic(err)
+		}
+
+		json.NewEncoder(w).Encode(u)
 	}
 
-	json.NewEncoder(w).Encode(u)
 }
 
 func BookTime(w http.ResponseWriter, r *http.Request) {
