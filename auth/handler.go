@@ -58,7 +58,6 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 
 	if deleteErr != nil {
 		log.Panic(deleteErr)
-		w.WriteHeader(http.StatusBadRequest)
 	}
 
 	http.SetCookie(w, &http.Cookie{
