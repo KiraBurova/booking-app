@@ -1,8 +1,6 @@
 package user
 
 import (
-	"log"
-
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -17,12 +15,8 @@ type TimeslotStatus struct {
 	Booked bool `json:"booked"`
 }
 
-func (u *User) setPassword() string {
+func (u *User) setPassword() (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(u.Password), 14)
 
-	if err != nil {
-		log.Panic(err)
-	}
-
-	return string(bytes)
+	return string(bytes), err
 }
