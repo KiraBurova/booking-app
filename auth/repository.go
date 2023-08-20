@@ -15,23 +15,26 @@ func NewRepository(db *sql.DB) *Repository {
 }
 
 func createTable() {
-	const create = `CREATE TABLE IF NOT EXISTS sessions(token TEXT)`
+	const create = `CREATE TABLE IF NOT EXISTS sessions(token TEXT, userId TEXT)`
 
 	if _, err := db.DbInstance.Exec(create); err != nil {
 		log.Fatal(err)
 	}
 }
 
-func (r Repository) Create(token string) error {
+func (r Repository) Create(token string, userId string) error {
 	createTable()
 
-	query := "INSERT INTO sessions(token) values(?)"
+	log.Println(token, userId)
 
-	_, err := db.DbInstance.Exec(query, token)
+	query := "INSERT INTO sessions(token, userId) values(?,?)"
+
+	_, err := db.DbInstance.Exec(query, token, userId)
 
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -45,4 +48,15 @@ func (r Repository) Delete(token string) error {
 	}
 
 	return nil
+}
+
+func (r Repository) Get(token string) (bool, error) {
+	var t string
+	query := "SELECT * FROM sessions WHERE token=?"
+
+	row := db.DbInstance.QueryRow(query)
+
+	err := row.Scan(&t)
+
+	return t == token, err
 }

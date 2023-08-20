@@ -32,7 +32,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 	sessionToken := uuid.NewString()
 
-	createErr := authRepo.Create(sessionToken)
+	createErr := authRepo.Create(sessionToken, user.Id)
 
 	if createErr != nil {
 		log.Panic(createErr)
@@ -47,7 +47,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 func Logout(w http.ResponseWriter, r *http.Request) {
 	authRepo := NewRepository(db.DbInstance)
 
-	cookie, err := r.Cookie("session_token")
+	cookie, err := getCookie(r)
 
 	if err != nil {
 		log.Panic(err)
