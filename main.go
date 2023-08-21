@@ -12,16 +12,18 @@ import (
 )
 
 func handleRequests() {
-	myRouter := mux.NewRouter().StrictSlash(true)
-	myRouter.HandleFunc("/timezones", timezone.ListTimezones)
-	myRouter.HandleFunc("/timezone", timezone.AddTimezone).Methods("POST")
-	myRouter.HandleFunc("/convert_timezone", timezone.ConvertTimezone).Methods("POST")
-	myRouter.HandleFunc("/register", user.Register).Methods("POST")
-	myRouter.HandleFunc("/login", auth.Login).Methods("POST")
-	myRouter.HandleFunc("/logout", auth.Logout).Methods("POST")
-	myRouter.HandleFunc("/book_time/{userId}", user.BookTime).Methods("POST")
+	router := mux.NewRouter().StrictSlash(true)
 
-	err := http.ListenAndServe(":10000", myRouter)
+	router.HandleFunc("/register", user.Register).Methods("POST")
+	router.HandleFunc("/login", auth.Login).Methods("POST")
+	router.HandleFunc("/logout", auth.Logout).Methods("POST")
+
+	router.HandleFunc("/timezones", timezone.ListTimezones)
+	router.HandleFunc("/timezone", timezone.AddTimezone).Methods("POST")
+	router.HandleFunc("/convert_timezone", timezone.ConvertTimezone).Methods("POST")
+	router.Handle("/book_time", auth.SessionId(http.HandlerFunc(user.BookTime)))
+
+	err := http.ListenAndServe(":10000", router)
 
 	if err != nil {
 		log.Fatal(err)

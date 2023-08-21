@@ -52,11 +52,12 @@ func (r Repository) Delete(token string) error {
 
 func (r Repository) Get(token string) (bool, error) {
 	var t string
+	var id string
 	query := "SELECT * FROM sessions WHERE token=?"
 
-	row := db.DbInstance.QueryRow(query)
+	row := db.DbInstance.QueryRow(query, token)
 
-	err := row.Scan(&t)
+	err := row.Scan(&t, &id)
 
 	return t == token, err
 }
