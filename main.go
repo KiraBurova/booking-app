@@ -14,14 +14,17 @@ import (
 func handleRequests() {
 	router := mux.NewRouter().StrictSlash(true)
 
-	router.HandleFunc("/register", user.Register).Methods("POST")
-	router.HandleFunc("/login", auth.Login).Methods("POST")
-	router.HandleFunc("/logout", auth.Logout).Methods("POST")
+	router.HandleFunc("/api/register", user.Register).Methods("POST")
+	router.HandleFunc("/api/login", auth.Login).Methods("POST")
+	router.HandleFunc("/api/logout", auth.Logout).Methods("POST")
 
-	router.HandleFunc("/timezones", timezone.ListTimezones)
-	router.HandleFunc("/timezone", timezone.AddTimezone).Methods("POST")
-	router.HandleFunc("/convert_timezone", timezone.ConvertTimezone).Methods("POST")
-	router.Handle("/book_time", auth.SessionId(http.HandlerFunc(user.BookTime)))
+	api := router.PathPrefix("/api").Subrouter()
+	api.Use(middlewares()...)
+
+	api.Path("/timezones").Handler(http.HandlerFunc(timezone.ListTimezones))
+	api.Path("/timezone").Handler(http.HandlerFunc(timezone.AddTimezone))
+	api.Path("/convert_timezone").Handler(http.HandlerFunc(timezone.ConvertTimezone))
+	api.Path("/book_time").Handler(http.HandlerFunc(user.BookTime))
 
 	err := http.ListenAndServe(":10000", router)
 
@@ -29,6 +32,12 @@ func handleRequests() {
 		log.Fatal(err)
 	}
 
+}
+
+func middlewares() []mux.MiddlewareFunc {
+	return []mux.MiddlewareFunc{
+		auth.ValidationMiddleware,
+	}
 }
 
 func main() {

@@ -13,7 +13,7 @@ func WithSessionId(ctx context.Context, cookie string) context.Context {
 	return context.WithValue(ctx, ctxKeySessionId{}, cookie)
 }
 
-func SessionId(next http.Handler) http.Handler {
+func ValidationMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		cookie, err := getCookie(r)
 
