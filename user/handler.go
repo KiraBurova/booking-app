@@ -2,7 +2,6 @@ package user
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 	"timezone-converter/db"
 
@@ -28,22 +27,31 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	}`
 	u.Timeslots = defaultTimeslots
 	u.Id = uuid.NewString()
-	u.Password = u.setPassword()
+	password, errorSetPassword := u.setPassword()
+	u.Password = password
+
+	if errorSetPassword != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
 
 	userExists, userExistsError := repo.UserExists(u.Username)
 
-	if userExists == true {
-		log.Panic(userExistsError)
-		w.WriteHeader(http.StatusConflict)
-	} else {
-		err := repo.Create(u)
-
-		if err != nil {
-			log.Panic(err)
-		}
-
-		json.NewEncoder(w).Encode(u)
+	if userExistsError != nil {
+		w.WriteHeader(http.StatusInternalServerError)
 	}
+
+	if userExists == true {
+		w.WriteHeader(http.StatusConflict)
+		return
+	}
+
+	err := repo.Create(u)
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+
+	json.NewEncoder(w).Encode(u)
 
 }
 
@@ -56,13 +64,13 @@ func BookTime(w http.ResponseWriter, r *http.Request) {
 	user, err := repo.GetById(userId)
 
 	if err != nil {
-		log.Panic(err)
+		w.WriteHeader(http.StatusInternalServerError)
 	}
 
 	var timeSlots map[string]interface{}
 	err = json.Unmarshal([]byte(user.Timeslots), &timeSlots)
 
 	if err != nil {
-		log.Panic(err)
+		w.WriteHeader(http.StatusInternalServerError)
 	}
 }
