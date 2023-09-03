@@ -25,8 +25,6 @@ func createTable() {
 func (r Repository) Create(token string, userId string) error {
 	createTable()
 
-	log.Println(token, userId)
-
 	query := "INSERT INTO sessions(token, userId) values(?,?)"
 
 	_, err := db.DbInstance.Exec(query, token, userId)

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"time"
 )
@@ -15,7 +14,7 @@ func AddTimezone(w http.ResponseWriter, r *http.Request) {
 	timezone, err := ioutil.ReadAll(r.Body)
 
 	if err != nil {
-		log.Panic(err)
+		w.WriteHeader(http.StatusInternalServerError)
 	}
 
 	Timezones = append(Timezones, string(timezone))
@@ -32,13 +31,13 @@ func ConvertTimezone(w http.ResponseWriter, r *http.Request) {
 	timezone, err := ioutil.ReadAll(r.Body)
 
 	if err != nil {
-		log.Panic(err)
+		w.WriteHeader(http.StatusInternalServerError)
 	}
 
 	loc, loadLocationErr := time.LoadLocation(string(timezone))
 
 	if loadLocationErr != nil {
-		log.Panic(loadLocationErr)
+		w.WriteHeader(http.StatusInternalServerError)
 	}
 
 	fmt.Printf("Time in %v: %s\n", string(timezone), now.In(loc))
