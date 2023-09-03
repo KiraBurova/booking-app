@@ -6,7 +6,6 @@ import (
 	"timezone-converter/db"
 
 	"github.com/google/uuid"
-	"github.com/gorilla/mux"
 )
 
 func Register(w http.ResponseWriter, r *http.Request) {
@@ -56,21 +55,23 @@ func Register(w http.ResponseWriter, r *http.Request) {
 }
 
 func BookTime(w http.ResponseWriter, r *http.Request) {
-	repo := NewRepository(db.DbInstance)
+	// TODO: work on book time implementation
 
-	params := mux.Vars(r)
-	userId := params["userId"]
+	// repo := NewRepository(db.DbInstance)
 
-	user, err := repo.GetById(userId)
+	// params := mux.Vars(r)
+	// userId := params["userId"]
 
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-	}
+	// user, err := repo.GetById(userId)
 
-	var timeSlots map[string]interface{}
-	err = json.Unmarshal([]byte(user.Timeslots), &timeSlots)
+	// if err != nil {
+	// 	log.Panic(err)
+	// }
 
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-	}
+	// var timeSlots map[string]interface{}
+	// err = json.Unmarshal([]byte(user.Timeslots), &timeSlots)
+
+	// if err != nil {
+	// 	log.Panic(err)
+	// }
 }
