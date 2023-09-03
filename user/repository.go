@@ -68,5 +68,15 @@ func (r Repository) UserExists(username string) (bool, error) {
 	return false, err
 }
 
-func (r Repository) Update(id int, user User) {}
-func (r Repository) Delete(id int)            {}
+func (r Repository) Update(user User) error {
+	query := `UPDATE users SET username = $1, password = $2, timeslots = $3 WHERE id = $4`
+	_, err := db.DbInstance.Exec(query, user.Username, user.Password, user.Timeslots, user.Id)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r Repository) Delete(id int) {}

@@ -54,24 +54,45 @@ func Register(w http.ResponseWriter, r *http.Request) {
 
 }
 
+type BookTimeData struct {
+	Id   string `json:"id"`
+	Time string `json:"time"`
+}
+
 func BookTime(w http.ResponseWriter, r *http.Request) {
-	// TODO: work on book time implementation
+	repo := NewRepository(db.DbInstance)
 
-	// repo := NewRepository(db.DbInstance)
+	var data BookTimeData
+	json.NewDecoder(r.Body).Decode(&data)
 
-	// params := mux.Vars(r)
-	// userId := params["userId"]
+	user, err := repo.GetById(data.Id)
 
-	// user, err := repo.GetById(userId)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+	}
 
-	// if err != nil {
-	// 	log.Panic(err)
-	// }
+	var timeSlots map[string]interface{}
+	err = json.Unmarshal([]byte(user.Timeslots), &timeSlots)
 
-	// var timeSlots map[string]interface{}
-	// err = json.Unmarshal([]byte(user.Timeslots), &timeSlots)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+	}
 
-	// if err != nil {
-	// 	log.Panic(err)
-	// }
+	if slot, ok := timeSlots[data.Time]; ok {
+		var booked = slot.(map[string]interface{})["Booked"]
+
+		if booked == true {
+			// or 409 Conflict ?
+			w.WriteHeader(http.StatusForbidden)
+		}
+
+		if booked == false {
+			slot.(map[string]interface{})["Booked"] = true
+		}
+
+		marshaledJson, _ := json.Marshal(timeSlots)
+		user.Timeslots = string(marshaledJson)
+		repo.Update(user)
+	}
+
 }
