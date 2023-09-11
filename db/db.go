@@ -8,7 +8,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-const create string = `CREATE TABLE IF NOT EXISTS users(id TEXT, username TEXT, password TEXT, timeslots BLOB);`
+const create string = `CREATE TABLE IF NOT EXISTS users(id TEXT, username TEXT, password TEXT);`
 
 var DbInstance *sql.DB
 

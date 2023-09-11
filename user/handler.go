@@ -1,6 +1,7 @@
 package user
 
 import (
+	"database/sql"
 	"encoding/json"
 	"net/http"
 	"timezone-converter/db"
@@ -14,85 +15,65 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	var u User
 	json.NewDecoder(r.Body).Decode(&u)
 
-	defaultTimeslots := `{
-		"9:00":  {"Booked": false},
-		"10:00": {"Booked": false},
-		"11:00": {"Booked": false},
-		"12:00": {"Booked": false},
-		"13:00": {"Booked": false},
-		"14:00": {"Booked": false},
-		"15:00": {"Booked": false},
-		"16:00": {"Booked": false}
-	}`
-	u.Timeslots = defaultTimeslots
 	u.Id = uuid.NewString()
 	password, errorSetPassword := u.setPassword()
 	u.Password = password
 
 	if errorSetPassword != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 
 	userExists, userExistsError := repo.UserExists(u.Username)
 
-	if userExistsError != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-	}
-
-	if userExists == true {
+	if userExists {
 		w.WriteHeader(http.StatusConflict)
 		return
 	}
 
-	err := repo.Create(u)
-
-	if err != nil {
+	if userExistsError == sql.ErrNoRows {
 		w.WriteHeader(http.StatusInternalServerError)
+
+		err := repo.Create(u)
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	}
+
+	defaultTimeslot := Timeslot{CreatorId: u.Id, InvitedUserId: "", Time: "", Booked: false}
+	createTimeslotError := repo.CreateTimeslots(defaultTimeslot)
+
+	if createTimeslotError != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 
 	json.NewEncoder(w).Encode(u)
 
 }
 
-type BookTimeData struct {
-	Id   string `json:"id"`
-	Time string `json:"time"`
-}
-
-func BookTime(w http.ResponseWriter, r *http.Request) {
+func BookTimeslot(w http.ResponseWriter, r *http.Request) {
 	repo := NewRepository(db.DbInstance)
 
-	var data BookTimeData
+	var data Timeslot
 	json.NewDecoder(r.Body).Decode(&data)
 
-	user, err := repo.GetById(data.Id)
+	timeslot, err := repo.isTimeslotBooked(data)
 
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+	// if there are no rows => timeslots were not created yet at all
+	if err == sql.ErrNoRows {
+		repo.CreateTimeslots(data)
+		return
 	}
 
-	var timeSlots map[string]interface{}
-	err = json.Unmarshal([]byte(user.Timeslots), &timeSlots)
-
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+	if timeslot.Booked && timeslot.CreatorId != data.CreatorId {
+		http.Error(w, "Somebody else already booked this slot", http.StatusConflict)
+		return
 	}
 
-	if slot, ok := timeSlots[data.Time]; ok {
-		var booked = slot.(map[string]interface{})["Booked"]
-
-		if booked == true {
-			// or 409 Conflict ?
-			w.WriteHeader(http.StatusForbidden)
-		}
-
-		if booked == false {
-			slot.(map[string]interface{})["Booked"] = true
-		}
-
-		marshaledJson, _ := json.Marshal(timeSlots)
-		user.Timeslots = string(marshaledJson)
-		repo.Update(user)
+	if timeslot.Booked && timeslot.CreatorId == data.CreatorId {
+		http.Error(w, "You already booked this slot", http.StatusConflict)
 	}
-
 }

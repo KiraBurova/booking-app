@@ -24,7 +24,7 @@ func handleRequests() {
 	api.Path("/timezones").Handler(http.HandlerFunc(timezone.ListTimezones))
 	api.Path("/timezone").Handler(http.HandlerFunc(timezone.AddTimezone))
 	api.Path("/convert_timezone").Handler(http.HandlerFunc(timezone.ConvertTimezone))
-	api.Path("/book_time").Handler(http.HandlerFunc(user.BookTime))
+	api.Path("/book_timeslot").Handler(http.HandlerFunc(user.BookTimeslot))
 
 	err := http.ListenAndServe(":10000", router)
 

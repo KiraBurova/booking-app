@@ -20,12 +20,14 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 
 	compareErr := comparePaswords(data.Password, user.Password)
 
 	if compareErr != nil {
 		w.WriteHeader(http.StatusUnauthorized)
+		return
 	}
 
 	sessionToken := uuid.NewString()
@@ -34,6 +36,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 	if createErr != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 
 	http.SetCookie(w, &http.Cookie{
@@ -49,12 +52,14 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
 
 	deleteErr := authRepo.Delete(cookie.Value)
 
 	if deleteErr != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 
 	http.SetCookie(w, &http.Cookie{
