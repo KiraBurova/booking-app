@@ -42,38 +42,10 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	defaultTimeslot := Timeslot{CreatorId: u.Id, InvitedUserId: "", Time: "", Booked: false}
-	createTimeslotError := repo.CreateTimeslots(defaultTimeslot)
-
-	if createTimeslotError != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
 	json.NewEncoder(w).Encode(u)
 
 }
 
 func BookTimeslot(w http.ResponseWriter, r *http.Request) {
-	repo := NewRepository(db.DbInstance)
 
-	var data Timeslot
-	json.NewDecoder(r.Body).Decode(&data)
-
-	timeslot, err := repo.isTimeslotBooked(data)
-
-	// if there are no rows => timeslots were not created yet at all
-	if err == sql.ErrNoRows {
-		repo.CreateTimeslots(data)
-		return
-	}
-
-	if timeslot.Booked && timeslot.CreatorId != data.CreatorId {
-		http.Error(w, "Somebody else already booked this slot", http.StatusConflict)
-		return
-	}
-
-	if timeslot.Booked && timeslot.CreatorId == data.CreatorId {
-		http.Error(w, "You already booked this slot", http.StatusConflict)
-	}
 }
