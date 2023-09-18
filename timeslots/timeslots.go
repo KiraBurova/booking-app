@@ -1,7 +1,9 @@
 package timeslots
 
 type Timeslot struct {
-	CreatorId     string `json:"CreatorId"`
+	// the person who books the timeslot
+	UserId string `json:"userId"`
+	// the person in whose calendar timeslot is booked
 	InvitedUserId string `json:"InvitedUserId"`
 	Time          string `json:"Time"`
 	Booked        bool   `json:"booked"`

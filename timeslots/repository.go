@@ -25,9 +25,9 @@ func createTimeslotsTable() {
 func (r Repository) CreateTimeslots(timeslot Timeslot) error {
 	createTimeslotsTable()
 
-	query := "INSERT INTO timeslots(creatorId, InvitedUserId, time, booked) values(?,?,?,true)"
+	query := "INSERT INTO timeslots(UserId, InvitedUserId, time, booked) values(?,?,?,?)"
 
-	_, err := db.DbInstance.Exec(query, timeslot.CreatorId, timeslot.InvitedUserId, timeslot.Time, timeslot.Booked)
+	_, err := db.DbInstance.Exec(query, timeslot.UserId, timeslot.InvitedUserId, timeslot.Time, timeslot.Booked)
 
 	if err != nil {
 		return err
@@ -42,7 +42,7 @@ func (r Repository) isTimeslotBooked(timeslot Timeslot) (Timeslot, error) {
 
 	row := db.DbInstance.QueryRow(query, timeslot.Time, timeslot.InvitedUserId)
 
-	err := row.Scan(&ts.CreatorId, &ts.InvitedUserId, &ts.Time, &ts.Booked)
+	err := row.Scan(&ts.UserId, &ts.InvitedUserId, &ts.Time, &ts.Booked)
 
 	if err != nil {
 		return ts, err
