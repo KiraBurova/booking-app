@@ -1,7 +1,6 @@
 package user
 
 import (
-	"database/sql"
 	"encoding/json"
 	"net/http"
 	"timezone-converter/db"
@@ -24,22 +23,18 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userExists, userExistsError := repo.UserExists(u.Username)
+	userExists := repo.UserExists(u.Username)
 
 	if userExists {
 		w.WriteHeader(http.StatusConflict)
 		return
 	}
 
-	if userExistsError == sql.ErrNoRows {
+	err := repo.Create(u)
+
+	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-
-		err := repo.Create(u)
-
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
+		return
 	}
 
 	json.NewEncoder(w).Encode(u)

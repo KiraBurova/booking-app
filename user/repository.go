@@ -3,6 +3,7 @@ package user
 import (
 	"database/sql"
 	"errors"
+	"io/fs"
 	"timezone-converter/db"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -58,14 +59,10 @@ func (r Repository) GetByUsername(username string) (User, error) {
 	return user, nil
 }
 
-func (r Repository) UserExists(username string) (bool, error) {
-	user, err := r.GetByUsername(username)
+func (r Repository) UserExists(username string) bool {
+	_, err := r.GetByUsername(username)
 
-	if user.Username == username {
-		return true, errors.New("User already exists")
-	}
-
-	return false, err
+	return errors.Is(err, fs.ErrExist)
 }
 
 func (r Repository) Update(user User) error {
