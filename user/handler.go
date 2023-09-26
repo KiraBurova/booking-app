@@ -23,7 +23,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userExists := repo.UserExists(u.Username)
+	userExists := repo.userExists(u.Username)
 
 	if userExists {
 		w.WriteHeader(http.StatusConflict)
@@ -38,9 +38,5 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	json.NewEncoder(w).Encode(u)
-
-}
-
-func BookTimeslot(w http.ResponseWriter, r *http.Request) {
 
 }

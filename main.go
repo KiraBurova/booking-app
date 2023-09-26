@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"timezone-converter/auth"
 	"timezone-converter/db"
+	"timezone-converter/timeslots"
 	"timezone-converter/timezone"
 	"timezone-converter/user"
 
@@ -24,9 +25,8 @@ func handleRequests() {
 	api.Path("/timezones").Handler(http.HandlerFunc(timezone.ListTimezones))
 	api.Path("/timezone").Handler(http.HandlerFunc(timezone.AddTimezone))
 	api.Path("/convert_timezone").Handler(http.HandlerFunc(timezone.ConvertTimezone))
-	api.Path("/create_timeslots").Handler(http.HandlerFunc(user.BookTimeslot))
-	api.Path("/get_timeslots").Handler(http.HandlerFunc(user.BookTimeslot))
-	api.Path("/book_timeslot").Handler(http.HandlerFunc(user.BookTimeslot))
+	api.Path("/create_timeslots").Handler(http.HandlerFunc(timeslots.CreateTimeslots))
+	api.Path("/book_timeslot").Handler(http.HandlerFunc(timeslots.BookTimeslot))
 
 	err := http.ListenAndServe(":10000", router)
 
