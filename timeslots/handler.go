@@ -30,17 +30,22 @@ func BookTimeslot(w http.ResponseWriter, r *http.Request) {
 	var data Timeslot
 	json.NewDecoder(r.Body).Decode(&data)
 
-	ts, _ := repo.getTimeslot(data)
-
-	if ts.Booked {
-		w.WriteHeader(http.StatusConflict)
-		return
-	}
-
-	_, err := repo.bookTimeslot(ts)
+	ts, err := repo.getTimeslot(data)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
+	}
+
+	if ts.Booked {
+		w.WriteHeader(http.StatusConflict)
+		return
+	} else {
+		err := repo.bookTimeslot(ts)
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 	}
 }

@@ -45,11 +45,7 @@ func (r Repository) userHasTimeslots(userId string) bool {
 
 	err := row.Scan(&ts.UserId, &ts.BookedTimeslotFromId, &ts.Time, &ts.Booked)
 
-	if err != nil && errors.Is(err, sql.ErrNoRows) {
-		return false
-	}
-
-	return true
+	return !(err != nil && errors.Is(err, sql.ErrNoRows))
 }
 
 func (r Repository) getTimeslot(timeslot Timeslot) (Timeslot, error) {
@@ -67,13 +63,13 @@ func (r Repository) getTimeslot(timeslot Timeslot) (Timeslot, error) {
 	return ts, nil
 }
 
-func (r Repository) bookTimeslot(timeslot Timeslot) (Timeslot, error) {
+func (r Repository) bookTimeslot(timeslot Timeslot) error {
 	query := `UPDATE timeslots SET booked = $1, BookedTimeslotFromId = $2 WHERE time=$3 AND userId=$4`
 	_, err := db.DbInstance.Exec(query, 1, timeslot.BookedTimeslotFromId, timeslot.Time, timeslot.UserId)
 
 	if err != nil {
-		return timeslot, err
+		return err
 	}
 
-	return timeslot, nil
+	return nil
 }
