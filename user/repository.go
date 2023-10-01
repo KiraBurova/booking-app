@@ -73,5 +73,3 @@ func (r Repository) update(user User) error {
 
 	return nil
 }
-
-func (r Repository) Delete(id int) {}
