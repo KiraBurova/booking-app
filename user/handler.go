@@ -14,32 +14,18 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	var u User
 	json.NewDecoder(r.Body).Decode(&u)
 
-	defaultTimeslots := `{
-		"9:00":  {"Booked": false},
-		"10:00": {"Booked": false},
-		"11:00": {"Booked": false},
-		"12:00": {"Booked": false},
-		"13:00": {"Booked": false},
-		"14:00": {"Booked": false},
-		"15:00": {"Booked": false},
-		"16:00": {"Booked": false}
-	}`
-	u.Timeslots = defaultTimeslots
 	u.Id = uuid.NewString()
 	password, errorSetPassword := u.setPassword()
 	u.Password = password
 
 	if errorSetPassword != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 
-	userExists, userExistsError := repo.UserExists(u.Username)
+	userExists := repo.userExists(u.Username)
 
-	if userExistsError != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-	}
-
-	if userExists == true {
+	if userExists {
 		w.WriteHeader(http.StatusConflict)
 		return
 	}
@@ -48,30 +34,9 @@ func Register(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 
 	json.NewEncoder(w).Encode(u)
 
-}
-
-func BookTime(w http.ResponseWriter, r *http.Request) {
-	// TODO: work on book time implementation
-
-	// repo := NewRepository(db.DbInstance)
-
-	// params := mux.Vars(r)
-	// userId := params["userId"]
-
-	// user, err := repo.GetById(userId)
-
-	// if err != nil {
-	// 	log.Panic(err)
-	// }
-
-	// var timeSlots map[string]interface{}
-	// err = json.Unmarshal([]byte(user.Timeslots), &timeSlots)
-
-	// if err != nil {
-	// 	log.Panic(err)
-	// }
 }

@@ -15,6 +15,7 @@ func AddTimezone(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 
 	Timezones = append(Timezones, string(timezone))
@@ -32,12 +33,14 @@ func ConvertTimezone(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 
 	loc, loadLocationErr := time.LoadLocation(string(timezone))
 
 	if loadLocationErr != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 
 	fmt.Printf("Time in %v: %s\n", string(timezone), now.In(loc))

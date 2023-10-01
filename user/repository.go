@@ -17,9 +17,9 @@ func NewRepository(db *sql.DB) *Repository {
 }
 
 func (r Repository) Create(user User) error {
-	query := "INSERT INTO users(id, username, password, timeslots) values(?,?,?,?)"
+	query := "INSERT INTO users(id, username, password) values(?,?,?)"
 
-	_, err := db.DbInstance.Exec(query, user.Id, user.Username, user.Password, user.Timeslots)
+	_, err := db.DbInstance.Exec(query, user.Id, user.Username, user.Password)
 
 	if err != nil {
 		return err
@@ -34,7 +34,7 @@ func (r Repository) GetById(id string) (User, error) {
 
 	row := db.DbInstance.QueryRow(query, id)
 
-	err := row.Scan(&user.Id, &user.Username, &user.Password, &user.Timeslots)
+	err := row.Scan(&user.Id, &user.Username, &user.Password)
 
 	if err != nil {
 		return user, err
@@ -49,7 +49,7 @@ func (r Repository) GetByUsername(username string) (User, error) {
 
 	row := db.DbInstance.QueryRow(query, username)
 
-	err := row.Scan(&user.Id, &user.Username, &user.Password, &user.Timeslots)
+	err := row.Scan(&user.Id, &user.Username, &user.Password)
 
 	if err != nil {
 		return user, err
@@ -58,15 +58,21 @@ func (r Repository) GetByUsername(username string) (User, error) {
 	return user, nil
 }
 
-func (r Repository) UserExists(username string) (bool, error) {
-	user, err := r.GetByUsername(username)
+func (r Repository) userExists(username string) bool {
+	_, err := r.GetByUsername(username)
 
-	if user.Username == username {
-		return true, errors.New("User already exists")
-	}
-
-	return false, err
+	return !(err != nil && errors.Is(err, sql.ErrNoRows))
 }
 
-func (r Repository) Update(id int, user User) {}
-func (r Repository) Delete(id int)            {}
+func (r Repository) update(user User) error {
+	query := `UPDATE users SET username = $1, password = $2, WHERE id = $3`
+	_, err := db.DbInstance.Exec(query, user.Username, user.Password, user.Id)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r Repository) Delete(id int) {}
