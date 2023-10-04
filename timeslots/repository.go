@@ -43,7 +43,7 @@ func (r Repository) getTimeslot(timeslot Timeslot) (Timeslot, error) {
 	ts := Timeslot{}
 	query := "SELECT * FROM timeslots WHERE time=$1 AND ownerId=$2"
 
-	row := db.DbInstance.QueryRow(query, timeslot.Time, timeslot.BookedById)
+	row := db.DbInstance.QueryRow(query, timeslot.Time, timeslot.OwnerId)
 
 	err := row.Scan(&ts.OwnerId, &ts.BookedById, &ts.Time, &ts.Booked)
 
