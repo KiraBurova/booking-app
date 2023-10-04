@@ -27,7 +27,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 
 	userExists, err := repo.userExists(u.Username)
 
-	if err != nil && errors.Is(err, sql.ErrNoRows) {
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

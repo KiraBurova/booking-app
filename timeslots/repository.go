@@ -15,7 +15,7 @@ func NewRepository(db *sql.DB) *Repository {
 }
 
 func createTimeslotsTable() {
-	const create = `CREATE TABLE IF NOT EXISTS timeslots(ownerId TEXT, bookedById TEXT, time TEXT, booked INTEGER)`
+	const create = `CREATE TABLE IF NOT EXISTS timeslots(ownerId TEXT, bookedById TEXT, time BLOB, booked INTEGER)`
 
 	if _, err := db.DbInstance.Exec(create); err != nil {
 		log.Fatal(err)
@@ -27,7 +27,10 @@ func (r Repository) createTimeslots(timeslot Timeslot) error {
 
 	query := "INSERT INTO timeslots(ownerId, bookedById, time, booked) values(?,?,?,?)"
 
+	// TODO: error  sql: converting argument $3 type: unsupported type timeslots.TimePeriod, a struct
 	_, err := db.DbInstance.Exec(query, timeslot.OwnerId, timeslot.BookedById, timeslot.Time, timeslot.Booked)
+
+	log.Println(err)
 
 	if err != nil {
 		return err
