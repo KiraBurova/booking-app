@@ -2,7 +2,6 @@ package timeslots
 
 import (
 	"database/sql"
-	"errors"
 	"log"
 	"timezone-converter/db"
 )
@@ -16,7 +15,7 @@ func NewRepository(db *sql.DB) *Repository {
 }
 
 func createTimeslotsTable() {
-	const create = `CREATE TABLE IF NOT EXISTS timeslots(userId TEXT, BookedTimeslotFromId TEXT, time TEXT, booked INTEGER)`
+	const create = `CREATE TABLE IF NOT EXISTS timeslots(ownerId TEXT, bookedById TEXT, time BLOB, booked INTEGER)`
 
 	if _, err := db.DbInstance.Exec(create); err != nil {
 		log.Fatal(err)
@@ -26,9 +25,12 @@ func createTimeslotsTable() {
 func (r Repository) createTimeslots(timeslot Timeslot) error {
 	createTimeslotsTable()
 
-	query := "INSERT INTO timeslots(userId, bookedTimeslotFromId, time, booked) values(?,?,?,?)"
+	query := "INSERT INTO timeslots(ownerId, bookedById, time, booked) values(?,?,?,?)"
 
-	_, err := db.DbInstance.Exec(query, timeslot.UserId, timeslot.BookedTimeslotFromId, timeslot.Time, timeslot.Booked)
+	// TODO: error  sql: converting argument $3 type: unsupported type timeslots.TimePeriod, a struct
+	_, err := db.DbInstance.Exec(query, timeslot.OwnerId, timeslot.BookedById, timeslot.Time, timeslot.Booked)
+
+	log.Println(err)
 
 	if err != nil {
 		return err
@@ -37,24 +39,13 @@ func (r Repository) createTimeslots(timeslot Timeslot) error {
 	return nil
 }
 
-func (r Repository) userHasTimeslots(userId string) bool {
-	ts := Timeslot{}
-	query := "SELECT * FROM timeslots WHERE userId=?"
-
-	row := db.DbInstance.QueryRow(query, userId)
-
-	err := row.Scan(&ts.UserId, &ts.BookedTimeslotFromId, &ts.Time, &ts.Booked)
-
-	return !(err != nil && errors.Is(err, sql.ErrNoRows))
-}
-
 func (r Repository) getTimeslot(timeslot Timeslot) (Timeslot, error) {
 	ts := Timeslot{}
-	query := "SELECT * FROM timeslots WHERE time=$1 AND userId=$2"
+	query := "SELECT * FROM timeslots WHERE time=$1 AND ownerId=$2"
 
-	row := db.DbInstance.QueryRow(query, timeslot.Time, timeslot.BookedTimeslotFromId)
+	row := db.DbInstance.QueryRow(query, timeslot.Time, timeslot.OwnerId)
 
-	err := row.Scan(&ts.UserId, &ts.BookedTimeslotFromId, &ts.Time, &ts.Booked)
+	err := row.Scan(&ts.OwnerId, &ts.BookedById, &ts.Time, &ts.Booked)
 
 	if err != nil {
 		return ts, err
@@ -64,8 +55,8 @@ func (r Repository) getTimeslot(timeslot Timeslot) (Timeslot, error) {
 }
 
 func (r Repository) bookTimeslot(timeslot Timeslot) error {
-	query := `UPDATE timeslots SET booked = $1, BookedTimeslotFromId = $2 WHERE time=$3 AND userId=$4`
-	_, err := db.DbInstance.Exec(query, 1, timeslot.BookedTimeslotFromId, timeslot.Time, timeslot.UserId)
+	query := `UPDATE timeslots SET booked = $1, bookedById = $2 WHERE time=$3 AND ownerId=$4`
+	_, err := db.DbInstance.Exec(query, 1, timeslot.BookedById, timeslot.Time, timeslot.OwnerId)
 
 	if err != nil {
 		return err

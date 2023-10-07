@@ -7,7 +7,8 @@ import (
 )
 
 type TimeslotData struct {
-	UserId string `json:"userId"`
+	OwnerId string       `json:"ownerId"`
+	Time    []TimePeriod `json:"time"`
 }
 
 func CreateTimeslots(w http.ResponseWriter, r *http.Request) {
@@ -16,11 +17,15 @@ func CreateTimeslots(w http.ResponseWriter, r *http.Request) {
 
 	repo := NewRepository(db.DbInstance)
 
-	time := [6]string{"10:00", "11:00", "12:00", "13:00", "14:00", "15:00"}
+	for i := 0; i < len(timeslotsData.Time); i++ {
+		t := Timeslot{OwnerId: timeslotsData.OwnerId, Time: timeslotsData.Time[i], Booked: false}
 
-	for i := 0; i < len(time); i++ {
-		t := Timeslot{UserId: timeslotsData.UserId, Time: time[i], Booked: false}
-		repo.createTimeslots(t)
+		err := repo.createTimeslots(t)
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 	}
 }
 
