@@ -13,3 +13,7 @@ type TimePeriod struct {
 	From time.Time `json:"from"`
 	To   time.Time `json:"to"`
 }
+
+func isTimePeriodValid(timeperiod TimePeriod) {
+	return timeperiod.From.Before(timeperiod.To)
+}
