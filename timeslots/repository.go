@@ -25,6 +25,8 @@ func createTimeslotsTable() {
 func (r Repository) createTimeslots(timeslot Timeslot) error {
 	createTimeslotsTable()
 
+	log.Println(timeslot)
+
 	query := "INSERT INTO timeslots(ownerId, bookedById, time, booked) values(?,?,?,?)"
 
 	// TODO: error  sql: converting argument $3 type: unsupported type timeslots.TimePeriod, a struct

@@ -2,6 +2,7 @@ package timeslots
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"timezone-converter/db"
 )
@@ -17,15 +18,15 @@ func CreateTimeslots(w http.ResponseWriter, r *http.Request) {
 
 	repo := NewRepository(db.DbInstance)
 
-	for i := 0; i < len(timeslotsData.Time); i++ {
-		t := Timeslot{OwnerId: timeslotsData.OwnerId, Time: timeslotsData.Time[i], Booked: false}
+	log.Println(timeslotsData.Time)
 
-		err := repo.createTimeslots(t)
+	timeslot := Timeslot{OwnerId: timeslotsData.OwnerId, Time: json.Marshal(timeslotsData.Time), Booked: false}
 
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
+	err := repo.createTimeslots(timeslot)
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 }
 
