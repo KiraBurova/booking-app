@@ -29,6 +29,7 @@ func (r Repository) createTimeslots(timeslot Timeslot) error {
 
 	query := "INSERT INTO timeslots(ownerId, bookedById, time, booked) values(?,?,?,?)"
 
+	// TODO: error  sql: converting argument $3 type: unsupported type timeslots.TimePeriod, a struct
 	_, err := db.DbInstance.Exec(query, timeslot.OwnerId, timeslot.BookedById, timeslot.Time, timeslot.Booked)
 
 	log.Println(err)
@@ -40,19 +41,30 @@ func (r Repository) createTimeslots(timeslot Timeslot) error {
 	return nil
 }
 
-func (r Repository) getTimeslot(timeslot Timeslot) (Timeslot, error) {
-	ts := Timeslot{}
+func (r Repository) getTimeslot(timeslot Timeslot) ([]Timeslot, error) {
 	query := "SELECT * FROM timeslots WHERE ownerId=$2"
 
-	row := db.DbInstance.QueryRow(query, timeslot.OwnerId)
-
-	err := row.Scan(&ts.OwnerId, &ts.BookedById, &ts.Time, &ts.Booked)
+	rows, err := db.DbInstance.Query(query, timeslot.OwnerId)
 
 	if err != nil {
-		return ts, err
+		return nil, err
 	}
 
-	return ts, nil
+	results := []Timeslot{}
+	defer rows.Close()
+
+	for rows.Next() {
+		ts := Timeslot{}
+		err = rows.Scan(&ts.OwnerId, &ts.BookedById, &ts.Time, &ts.Booked)
+
+		if err != nil {
+			return nil, err
+		}
+
+		results = append(results, ts)
+	}
+
+	return results, nil
 }
 
 func (r Repository) bookTimeslot(timeslot Timeslot) error {

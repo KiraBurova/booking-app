@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 	"timezone-converter/db"
+
+	"github.com/google/go-cmp/cmp"
 )
 
 type TimeslotData struct {
@@ -44,6 +46,7 @@ func BookTimeslot(w http.ResponseWriter, r *http.Request) {
 	var data Timeslot
 	json.NewDecoder(r.Body).Decode(&data)
 
+	// TODO: data.Time is empty here
 	ts, err := repo.getTimeslot(data)
 
 	if err != nil {
@@ -51,11 +54,27 @@ func BookTimeslot(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if ts.Booked {
+	var foundTimeslot Timeslot
+
+	for i := 0; i < len(ts); i++ {
+		var time TimePeriod
+		marshalError := json.Unmarshal(ts[i].Time, &time)
+
+		if marshalError != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		if cmp.Equal(time, data.Time) {
+			foundTimeslot = ts[i]
+		}
+	}
+
+	if foundTimeslot.Booked {
 		w.WriteHeader(http.StatusConflict)
 		return
 	} else {
-		err := repo.bookTimeslot(ts)
+		err := repo.bookTimeslot(foundTimeslot)
 
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
