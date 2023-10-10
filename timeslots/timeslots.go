@@ -3,10 +3,10 @@ package timeslots
 import "time"
 
 type Timeslot struct {
-	OwnerId    string       `json:"ownerId"`
-	BookedById string       `json:"bookedById"`
-	Time       []TimePeriod `json:"time"`
-	Booked     bool         `json:"booked"`
+	OwnerId    string `json:"ownerId"`
+	BookedById string `json:"bookedById"`
+	Time       []byte `json:"time"`
+	Booked     bool   `json:"booked"`
 }
 
 type TimePeriod struct {
@@ -14,6 +14,6 @@ type TimePeriod struct {
 	To   time.Time `json:"to"`
 }
 
-func isTimePeriodValid(timeperiod TimePeriod) {
+func isTimePeriodValid(timeperiod TimePeriod) bool {
 	return timeperiod.From.Before(timeperiod.To)
 }
