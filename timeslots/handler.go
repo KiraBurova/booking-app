@@ -11,6 +11,8 @@ type TimeslotData struct {
 	Time    []TimePeriod `json:"time"`
 }
 
+// time payload format that works
+// "time": [{"From": "2014-11-12T11:45:26.371Z", "To": "2017-11-12T11:45:26.371Z"}]
 func CreateTimeslots(w http.ResponseWriter, r *http.Request) {
 	var timeslotsData TimeslotData
 	json.NewDecoder(r.Body).Decode(&timeslotsData)
@@ -23,16 +25,11 @@ func CreateTimeslots(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	jsonTime, err := json.Marshal(timeslotsData.Time)
+	for i := 0; i < len(timeslotsData.Time); i++ {
+		jsonTime, _ := json.Marshal(timeslotsData.Time[i])
+		t := Timeslot{OwnerId: timeslotsData.OwnerId, Time: jsonTime, Booked: false}
 
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	} else {
-
-		timeslot := Timeslot{OwnerId: timeslotsData.OwnerId, Time: jsonTime, Booked: false}
-
-		err := repo.createTimeslots(timeslot)
+		err := repo.createTimeslots(t)
 
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
