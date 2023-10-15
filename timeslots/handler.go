@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"timezone-converter/db"
-
-	"github.com/google/go-cmp/cmp"
 )
 
 type TimeslotData struct {
@@ -28,9 +26,10 @@ func CreateTimeslots(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for i := 0; i < len(timeslotsData.Time); i++ {
-		jsonTime, _ := json.Marshal(timeslotsData.Time[i])
-		t := Timeslot{OwnerId: timeslotsData.OwnerId, Time: jsonTime, Booked: false}
+		timeInUnixTo := timeslotsData.Time[i].To.Unix()
+		timeInUnixFrom := timeslotsData.Time[i].From.Unix()
 
+		t := TimeslotInDb{TimeslotBase: TimeslotBase{OwnerId: timeslotsData.OwnerId, Booked: false}, TimeFrom: timeInUnixFrom, TimeTo: timeInUnixTo}
 		err := repo.createTimeslots(t)
 
 		if err != nil {
@@ -46,7 +45,6 @@ func BookTimeslot(w http.ResponseWriter, r *http.Request) {
 	var data Timeslot
 	json.NewDecoder(r.Body).Decode(&data)
 
-	// TODO: data.Time is empty here
 	ts, err := repo.getTimeslot(data)
 
 	if err != nil {
@@ -54,27 +52,13 @@ func BookTimeslot(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var foundTimeslot Timeslot
+	ts.BookedById = data.BookedById
 
-	for i := 0; i < len(ts); i++ {
-		var time TimePeriod
-		marshalError := json.Unmarshal(ts[i].Time, &time)
-
-		if marshalError != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-
-		if cmp.Equal(time, data.Time) {
-			foundTimeslot = ts[i]
-		}
-	}
-
-	if foundTimeslot.Booked {
+	if ts.Booked {
 		w.WriteHeader(http.StatusConflict)
 		return
 	} else {
-		err := repo.bookTimeslot(foundTimeslot)
+		err := repo.bookTimeslot(ts)
 
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)

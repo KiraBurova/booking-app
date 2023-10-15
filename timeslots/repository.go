@@ -15,19 +15,19 @@ func NewRepository(db *sql.DB) *Repository {
 }
 
 func createTimeslotsTable() {
-	const create = `CREATE TABLE IF NOT EXISTS timeslots(ownerId TEXT, bookedById TEXT, time BLOB, booked INTEGER)`
+	const create = `CREATE TABLE IF NOT EXISTS timeslots(ownerId TEXT, bookedById TEXT, timeFrom INTEGER, timeTo INTEGER, booked INTEGER)`
 
 	if _, err := db.DbInstance.Exec(create); err != nil {
 		log.Fatal(err)
 	}
 }
 
-func (r Repository) createTimeslots(timeslot Timeslot) error {
+func (r Repository) createTimeslots(timeslot TimeslotInDb) error {
 	createTimeslotsTable()
 
-	query := "INSERT INTO timeslots(ownerId, bookedById, time, booked) values(?,?,?,?)"
+	query := "INSERT INTO timeslots(ownerId, bookedById, timeFrom, timeTo, booked) values(?,?,?,?,?)"
 
-	_, err := db.DbInstance.Exec(query, timeslot.OwnerId, timeslot.BookedById, timeslot.Time, timeslot.Booked)
+	_, err := db.DbInstance.Exec(query, timeslot.OwnerId, timeslot.BookedById, timeslot.TimeFrom, timeslot.TimeTo, timeslot.Booked)
 
 	if err != nil {
 		return err
@@ -36,35 +36,32 @@ func (r Repository) createTimeslots(timeslot Timeslot) error {
 	return nil
 }
 
-func (r Repository) getTimeslot(timeslot Timeslot) ([]Timeslot, error) {
-	query := "SELECT * FROM timeslots WHERE ownerId=$2"
+func (r Repository) getTimeslot(timeslot Timeslot) (TimeslotInDb, error) {
 
-	rows, err := db.DbInstance.Query(query, timeslot.OwnerId)
+	ts := TimeslotInDb{}
 
-	if err != nil {
-		return nil, err
-	}
+	for i := 0; i < len(timeslot.Time); i++ {
+		timeInUnixTo := timeslot.Time[i].To.Unix()
+		timeInUnixFrom := timeslot.Time[i].From.Unix()
 
-	results := []Timeslot{}
-	defer rows.Close()
+		query := "SELECT * FROM timeslots WHERE ownerId=$2 AND timeFrom=$3 AND timeTo=$4"
 
-	for rows.Next() {
-		ts := Timeslot{}
-		err = rows.Scan(&ts.OwnerId, &ts.BookedById, &ts.Time, &ts.Booked)
+		row := db.DbInstance.QueryRow(query, timeslot.OwnerId, timeInUnixFrom, timeInUnixTo)
+
+		err := row.Scan(&ts.OwnerId, &ts.BookedById, &ts.TimeFrom, &ts.TimeTo, &ts.Booked)
 
 		if err != nil {
-			return nil, err
+			return ts, err
 		}
-
-		results = append(results, ts)
 	}
 
-	return results, nil
+	return ts, nil
+
 }
 
-func (r Repository) bookTimeslot(timeslot Timeslot) error {
-	query := `UPDATE timeslots SET booked = $1, bookedById = $2 WHERE time=$3 AND ownerId=$4`
-	_, err := db.DbInstance.Exec(query, 1, timeslot.BookedById, timeslot.Time, timeslot.OwnerId)
+func (r Repository) bookTimeslot(timeslot TimeslotInDb) error {
+	query := `UPDATE timeslots SET booked = $1, bookedById = $2 WHERE timeFrom=$3 AND timeTo=$4 AND ownerId=$5`
+	_, err := db.DbInstance.Exec(query, 1, timeslot.BookedById, timeslot.TimeFrom, timeslot.TimeTo, timeslot.OwnerId)
 
 	if err != nil {
 		return err

@@ -1,12 +1,24 @@
 package timeslots
 
-import "time"
+import (
+	"time"
+)
 
-type Timeslot struct {
+type TimeslotBase struct {
 	OwnerId    string `json:"ownerId"`
 	BookedById string `json:"bookedById"`
-	Time       []byte `json:"time"`
 	Booked     bool   `json:"booked"`
+}
+
+type Timeslot struct {
+	TimeslotBase
+	Time []TimePeriod `json:"time"`
+}
+
+type TimeslotInDb struct {
+	TimeslotBase
+	TimeFrom int64 `json:"timeFrom"`
+	TimeTo   int64 `json:"timeTo"`
 }
 
 type TimePeriod struct {
