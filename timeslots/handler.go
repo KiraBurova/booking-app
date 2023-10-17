@@ -25,11 +25,14 @@ func CreateTimeslots(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	sortByTimeFrom(timeslotsData.Time)
+
 	for i := 0; i < len(timeslotsData.Time); i++ {
 		timeInUnixTo := timeslotsData.Time[i].To.Unix()
 		timeInUnixFrom := timeslotsData.Time[i].From.Unix()
 
 		t := TimeslotInDb{TimeslotBase: TimeslotBase{OwnerId: timeslotsData.OwnerId, Booked: false}, TimeFrom: timeInUnixFrom, TimeTo: timeInUnixTo}
+
 		err := repo.createTimeslots(t)
 
 		if err != nil {
