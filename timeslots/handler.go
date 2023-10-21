@@ -3,14 +3,16 @@ package timeslots
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 	"timezone-converter/db"
 
 	"github.com/google/uuid"
 )
 
 type TimeslotData struct {
-	OwnerId string       `json:"ownerId"`
-	Time    []TimePeriod `json:"time"`
+	OwnerId    string       `json:"ownerId"`
+	Time       []TimePeriod `json:"time"`
+	BookingDay time.Time    `json:"BookingDay"`
 }
 
 // time payload format that works
@@ -18,6 +20,12 @@ type TimeslotData struct {
 func CreateTimeslots(w http.ResponseWriter, r *http.Request) {
 	var timeslotsData TimeslotData
 	json.NewDecoder(r.Body).Decode(&timeslotsData)
+
+	// TODO: check
+	if timeslotsData.BookingDay.IsZero() {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 
 	repo := NewRepository(db.DbInstance)
 
