@@ -40,30 +40,30 @@ func CreateTimeslots(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// func BookTimeslot(w http.ResponseWriter, r *http.Request) {
-// 	repo := NewRepository(db.DbInstance)
+func BookTimeslot(w http.ResponseWriter, r *http.Request) {
+	repo := NewRepository(db.DbInstance)
 
-// 	var data Timeslot
-// 	json.NewDecoder(r.Body).Decode(&data)
+	var data Timeslot
+	json.NewDecoder(r.Body).Decode(&data)
 
-// 	// ts, err := repo.getTimeslot(data)
+	ts, err := repo.getTimeslotById(data.Id)
 
-// 	if err != nil {
-// 		w.WriteHeader(http.StatusInternalServerError)
-// 		return
-// 	}
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 
-// 	ts.BookedById = data.BookedById
+	ts.BookedById = data.BookedById
 
-// 	if ts.Booked {
-// 		w.WriteHeader(http.StatusConflict)
-// 		return
-// 	} else {
-// 		err := repo.bookTimeslot(ts)
+	if ts.Booked {
+		w.WriteHeader(http.StatusConflict)
+		return
+	} else {
+		err := repo.bookTimeslot(ts)
 
-// 		if err != nil {
-// 			w.WriteHeader(http.StatusInternalServerError)
-// 			return
-// 		}
-// 	}
-// }
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	}
+}

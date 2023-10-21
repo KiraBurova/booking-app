@@ -41,6 +41,21 @@ func (r Repository) createTimeslot(timeslot Timeslot) error {
 	return nil
 }
 
+func (r Repository) getTimeslotById(id string) (TimeslotInDB, error) {
+	timeslot := TimeslotInDB{}
+	query := "SELECT * FROM timeslots WHERE id=?"
+
+	row := db.DbInstance.QueryRow(query, id)
+
+	err := row.Scan(&timeslot.Id, &timeslot.Booked, &timeslot.BookedById, &timeslot.OwnerId, &timeslot.TimeFrom, &timeslot.TimeTo)
+
+	if err != nil {
+		return timeslot, err
+	}
+
+	return timeslot, nil
+}
+
 func (r Repository) bookTimeslot(timeslot TimeslotInDB) error {
 	query := `UPDATE timeslots SET booked = $1, bookedById = $2 WHERE id=$3 AND ownerId=$4`
 	_, err := db.DbInstance.Exec(query, 1, timeslot.BookedById, timeslot.Id, timeslot.OwnerId)
