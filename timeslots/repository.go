@@ -22,12 +22,17 @@ func createTimeslotsTable() {
 	}
 }
 
-func (r Repository) createTimeslot(timeslot TimeslotInDB) error {
+func (r Repository) createTimeslot(timeslot Timeslot) error {
 	createTimeslotsTable()
 
-	query := "INSERT INTO timeslots(ownerId, bookedById, timeFrom, timeTo, booked) values(?,?,?,?,?)"
+	timeInUnixFrom := timeslot.TimeFrom.Unix()
+	timeInUnixTo := timeslot.TimeTo.Unix()
 
-	_, err := db.DbInstance.Exec(query, timeslot.OwnerId, timeslot.BookedById, timeslot.TimeFrom, timeslot.TimeTo, timeslot.Booked)
+	t := TimeslotInDB{TimeslotBase: TimeslotBase{Id: timeslot.Id, OwnerId: timeslot.OwnerId, Booked: false}, TimeFrom: timeInUnixFrom, TimeTo: timeInUnixTo}
+
+	query := "INSERT INTO timeslots(ownerId, bookedById, timeFrom, timeTo, booked) values(?,?,?,?,?,?)"
+
+	_, err := db.DbInstance.Exec(query, t.Id, t.OwnerId, t.BookedById, t.TimeFrom, t.TimeTo, t.Booked)
 
 	if err != nil {
 		return err
@@ -36,32 +41,9 @@ func (r Repository) createTimeslot(timeslot TimeslotInDB) error {
 	return nil
 }
 
-func (r Repository) getTimeslot(timeslot Timeslot) (TimeslotInDB, error) {
-
-	ts := TimeslotInDB{}
-
-	for i := 0; i < len(timeslot.Time); i++ {
-		timeInUnixTo := timeslot.Time[i].To.Unix()
-		timeInUnixFrom := timeslot.Time[i].From.Unix()
-
-		query := "SELECT * FROM timeslots WHERE ownerId=$2 AND timeFrom=$3 AND timeTo=$4"
-
-		row := db.DbInstance.QueryRow(query, timeslot.OwnerId, timeInUnixFrom, timeInUnixTo)
-
-		err := row.Scan(&ts.OwnerId, &ts.BookedById, &ts.TimeFrom, &ts.TimeTo, &ts.Booked)
-
-		if err != nil {
-			return ts, err
-		}
-	}
-
-	return ts, nil
-
-}
-
 func (r Repository) bookTimeslot(timeslot TimeslotInDB) error {
-	query := `UPDATE timeslots SET booked = $1, bookedById = $2 WHERE timeFrom=$3 AND timeTo=$4 AND ownerId=$5`
-	_, err := db.DbInstance.Exec(query, 1, timeslot.BookedById, timeslot.TimeFrom, timeslot.TimeTo, timeslot.OwnerId)
+	query := `UPDATE timeslots SET booked = $1, bookedById = $2 WHERE id=$3 AND ownerId=$4`
+	_, err := db.DbInstance.Exec(query, 1, timeslot.BookedById, timeslot.Id, timeslot.OwnerId)
 
 	if err != nil {
 		return err

@@ -1,11 +1,11 @@
 package timeslots
 
 import (
-	"sort"
 	"time"
 )
 
 type TimeslotBase struct {
+	Id         string `json:"id"`
 	OwnerId    string `json:"ownerId"`
 	BookedById string `json:"bookedById"`
 	Booked     bool   `json:"booked"`
@@ -13,7 +13,8 @@ type TimeslotBase struct {
 
 type Timeslot struct {
 	TimeslotBase
-	Time []TimePeriod `json:"time"`
+	TimeFrom time.Time `json:"timeFrom"`
+	TimeTo   time.Time `json:"timeTo"`
 }
 
 type TimeslotInDB struct {
@@ -29,25 +30,4 @@ type TimePeriod struct {
 
 func isTimePeriodValid(timeperiod TimePeriod) bool {
 	return timeperiod.From.Before(timeperiod.To)
-}
-
-func sortByTimeFrom(timeperiods []TimePeriod) {
-	sort.Slice(timeperiods, func(i, j int) bool {
-		return timeperiods[i].From.Before(timeperiods[j].From)
-	})
-}
-
-func areTimePeriodsOverlapping(timeperiods []TimePeriod) bool {
-
-	// sort timeperiods from earliest "from"
-
-	// check that the next "from" is bigger than the previous
-	// check that previous "to" is smaller than next "from"
-	// from 16th to 18th
-	// from 19th to 20th
-
-	// from 17th to 18th
-	// from 17th to 19th
-
-	return false
 }

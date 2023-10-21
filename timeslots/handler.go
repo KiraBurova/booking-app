@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 	"timezone-converter/db"
+
+	"github.com/google/uuid"
 )
 
 type TimeslotData struct {
@@ -25,13 +27,9 @@ func CreateTimeslots(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	sortByTimeFrom(timeslotsData.Time)
-
 	for i := 0; i < len(timeslotsData.Time); i++ {
-		timeInUnixTo := timeslotsData.Time[i].To.Unix()
-		timeInUnixFrom := timeslotsData.Time[i].From.Unix()
 
-		t := TimeslotInDB{TimeslotBase: TimeslotBase{OwnerId: timeslotsData.OwnerId, Booked: false}, TimeFrom: timeInUnixFrom, TimeTo: timeInUnixTo}
+		t := Timeslot{TimeslotBase: TimeslotBase{Id: uuid.NewString(), OwnerId: timeslotsData.OwnerId, Booked: false}, TimeFrom: timeslotsData.Time[i].From, TimeTo: timeslotsData.Time[i].To}
 
 		err := repo.createTimeslot(t)
 
@@ -42,30 +40,30 @@ func CreateTimeslots(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func BookTimeslot(w http.ResponseWriter, r *http.Request) {
-	repo := NewRepository(db.DbInstance)
+// func BookTimeslot(w http.ResponseWriter, r *http.Request) {
+// 	repo := NewRepository(db.DbInstance)
 
-	var data Timeslot
-	json.NewDecoder(r.Body).Decode(&data)
+// 	var data Timeslot
+// 	json.NewDecoder(r.Body).Decode(&data)
 
-	ts, err := repo.getTimeslot(data)
+// 	// ts, err := repo.getTimeslot(data)
 
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
+// 	if err != nil {
+// 		w.WriteHeader(http.StatusInternalServerError)
+// 		return
+// 	}
 
-	ts.BookedById = data.BookedById
+// 	ts.BookedById = data.BookedById
 
-	if ts.Booked {
-		w.WriteHeader(http.StatusConflict)
-		return
-	} else {
-		err := repo.bookTimeslot(ts)
+// 	if ts.Booked {
+// 		w.WriteHeader(http.StatusConflict)
+// 		return
+// 	} else {
+// 		err := repo.bookTimeslot(ts)
 
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-	}
-}
+// 		if err != nil {
+// 			w.WriteHeader(http.StatusInternalServerError)
+// 			return
+// 		}
+// 	}
+// }
