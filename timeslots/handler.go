@@ -31,9 +31,9 @@ func CreateTimeslots(w http.ResponseWriter, r *http.Request) {
 		timeInUnixTo := timeslotsData.Time[i].To.Unix()
 		timeInUnixFrom := timeslotsData.Time[i].From.Unix()
 
-		t := TimeslotInDb{TimeslotBase: TimeslotBase{OwnerId: timeslotsData.OwnerId, Booked: false}, TimeFrom: timeInUnixFrom, TimeTo: timeInUnixTo}
+		t := TimeslotInDB{TimeslotBase: TimeslotBase{OwnerId: timeslotsData.OwnerId, Booked: false}, TimeFrom: timeInUnixFrom, TimeTo: timeInUnixTo}
 
-		err := repo.createTimeslots(t)
+		err := repo.createTimeslot(t)
 
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)

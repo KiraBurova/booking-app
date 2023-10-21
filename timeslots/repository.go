@@ -22,7 +22,7 @@ func createTimeslotsTable() {
 	}
 }
 
-func (r Repository) createTimeslots(timeslot TimeslotInDb) error {
+func (r Repository) createTimeslot(timeslot TimeslotInDB) error {
 	createTimeslotsTable()
 
 	query := "INSERT INTO timeslots(ownerId, bookedById, timeFrom, timeTo, booked) values(?,?,?,?,?)"
@@ -36,9 +36,9 @@ func (r Repository) createTimeslots(timeslot TimeslotInDb) error {
 	return nil
 }
 
-func (r Repository) getTimeslot(timeslot Timeslot) (TimeslotInDb, error) {
+func (r Repository) getTimeslot(timeslot Timeslot) (TimeslotInDB, error) {
 
-	ts := TimeslotInDb{}
+	ts := TimeslotInDB{}
 
 	for i := 0; i < len(timeslot.Time); i++ {
 		timeInUnixTo := timeslot.Time[i].To.Unix()
@@ -59,7 +59,7 @@ func (r Repository) getTimeslot(timeslot Timeslot) (TimeslotInDb, error) {
 
 }
 
-func (r Repository) bookTimeslot(timeslot TimeslotInDb) error {
+func (r Repository) bookTimeslot(timeslot TimeslotInDB) error {
 	query := `UPDATE timeslots SET booked = $1, bookedById = $2 WHERE timeFrom=$3 AND timeTo=$4 AND ownerId=$5`
 	_, err := db.DbInstance.Exec(query, 1, timeslot.BookedById, timeslot.TimeFrom, timeslot.TimeTo, timeslot.OwnerId)
 

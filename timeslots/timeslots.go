@@ -16,7 +16,7 @@ type Timeslot struct {
 	Time []TimePeriod `json:"time"`
 }
 
-type TimeslotInDb struct {
+type TimeslotInDB struct {
 	TimeslotBase
 	TimeFrom int64 `json:"timeFrom"`
 	TimeTo   int64 `json:"timeTo"`
