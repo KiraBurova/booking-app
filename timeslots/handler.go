@@ -21,7 +21,7 @@ func CreateTimeslots(w http.ResponseWriter, r *http.Request) {
 	var timeslotsData TimeslotData
 	json.NewDecoder(r.Body).Decode(&timeslotsData)
 
-	// TODO: check
+	// check if BookingDay was not send
 	if timeslotsData.BookingDay.IsZero() {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -29,8 +29,19 @@ func CreateTimeslots(w http.ResponseWriter, r *http.Request) {
 
 	repo := NewRepository(db.DbInstance)
 
+	if !timeperiodsBelongToTheDay(timeslotsData.Time, timeslotsData.BookingDay) {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	if areTimePeriodsOverlapping(timeslotsData.Time) {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	for _, timePeriod := range timeslotsData.Time {
 		if !isTimePeriodValid(timePeriod) {
+			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 	}

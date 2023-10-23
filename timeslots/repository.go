@@ -15,7 +15,7 @@ func NewRepository(db *sql.DB) *Repository {
 }
 
 func createTimeslotsTable() {
-	const create = `CREATE TABLE IF NOT EXISTS timeslots(ownerId TEXT, bookedById TEXT, timeFrom INTEGER, timeTo INTEGER, booked INTEGER)`
+	const create = `CREATE TABLE IF NOT EXISTS timeslots(id TEXT, ownerId TEXT, bookedById TEXT, timeFrom INTEGER, timeTo INTEGER, booked INTEGER)`
 
 	if _, err := db.DbInstance.Exec(create); err != nil {
 		log.Fatal(err)
@@ -30,7 +30,7 @@ func (r Repository) createTimeslot(timeslot Timeslot) error {
 
 	t := TimeslotInDB{TimeslotBase: TimeslotBase{Id: timeslot.Id, OwnerId: timeslot.OwnerId, Booked: false}, TimeFrom: timeInUnixFrom, TimeTo: timeInUnixTo}
 
-	query := "INSERT INTO timeslots(ownerId, bookedById, timeFrom, timeTo, booked) values(?,?,?,?,?,?)"
+	query := "INSERT INTO timeslots(id, ownerId, bookedById, timeFrom, timeTo, booked) values(?,?,?,?,?,?)"
 
 	_, err := db.DbInstance.Exec(query, t.Id, t.OwnerId, t.BookedById, t.TimeFrom, t.TimeTo, t.Booked)
 
@@ -47,7 +47,7 @@ func (r Repository) getTimeslotById(id string) (TimeslotInDB, error) {
 
 	row := db.DbInstance.QueryRow(query, id)
 
-	err := row.Scan(&timeslot.Id, &timeslot.Booked, &timeslot.BookedById, &timeslot.OwnerId, &timeslot.TimeFrom, &timeslot.TimeTo)
+	err := row.Scan(&timeslot.Id, &timeslot.OwnerId, &timeslot.BookedById, &timeslot.TimeFrom, &timeslot.TimeTo, &timeslot.Booked)
 
 	if err != nil {
 		return timeslot, err
