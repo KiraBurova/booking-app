@@ -46,6 +46,9 @@ func CreateTimeslots(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// timeslots := []TimeslotData{timeslotsData}
+	// err := repo.createTimeslots(timeslots...)
+
 	for i := 0; i < len(timeslotsData.Time); i++ {
 
 		t := Timeslot{TimeslotBase: TimeslotBase{Id: uuid.NewString(), OwnerId: timeslotsData.OwnerId, Booked: false}, TimeFrom: timeslotsData.Time[i].From, TimeTo: timeslotsData.Time[i].To}

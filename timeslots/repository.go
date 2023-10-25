@@ -25,6 +25,14 @@ func createTimeslotsTable() {
 func (r Repository) createTimeslot(timeslot Timeslot) error {
 	createTimeslotsTable()
 
+	// for i := 0; i < len(timeslots); i++ {
+	// add id, TimeFrom, TimeTo here
+	//}
+
+	// for _, timeslot := range timeslots {
+	// add VALUES() into sql query
+	// }
+
 	timeInUnixFrom := timeslot.TimeFrom.Unix()
 	timeInUnixTo := timeslot.TimeTo.Unix()
 
