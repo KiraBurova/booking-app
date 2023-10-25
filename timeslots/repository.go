@@ -30,7 +30,7 @@ func (r Repository) createTimeslot(timeslot Timeslot) error {
 	//}
 
 	// for _, timeslot := range timeslots {
-	// add VALUES() into sql query
+	// somehow construct SQL query here
 	// }
 
 	timeInUnixFrom := timeslot.TimeFrom.Unix()
