@@ -55,7 +55,7 @@ func timeperiodsBelongToTheDay(timeperiods []TimePeriod, day time.Time) bool {
 		fromBelongsToDay := period.From.Day() == day.Day() && period.From.Month() == day.Month() && period.From.Year() == day.Year()
 		toBelongsToDay := period.To.Day() == day.Day() && period.To.Month() == day.Month() && period.To.Year() == day.Year()
 
-		if !fromBelongsToDay || !toBelongsToDay {
+		if !(fromBelongsToDay && toBelongsToDay) {
 			return false
 		}
 	}

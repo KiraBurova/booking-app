@@ -48,6 +48,18 @@ func TestAreTimeslotsOverlapping(t *testing.T) {
 
 		assert.False(t, valid)
 	})
+	t.Run("one time period starts when previous one ends", func(t *testing.T) {
+		now := time.Now()
+		twoHoursLater := time.Now().Add(time.Hour * 2)
+		threeHoursLater := time.Now().Add(time.Hour * 3)
+
+		t1 := TimePeriod{From: now, To: twoHoursLater}
+		t2 := TimePeriod{From: twoHoursLater, To: threeHoursLater}
+		testTime := []TimePeriod{t1, t2}
+		valid := areTimePeriodsOverlapping(testTime)
+
+		assert.False(t, valid)
+	})
 }
 
 func TestTimeperiodsBelongToTheDay(t *testing.T) {

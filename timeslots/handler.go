@@ -23,25 +23,25 @@ func CreateTimeslots(w http.ResponseWriter, r *http.Request) {
 
 	// check if BookingDay was not send
 	if timeslotsData.BookingDay.IsZero() {
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	repo := NewRepository(db.DbInstance)
 
 	if !timeperiodsBelongToTheDay(timeslotsData.Time, timeslotsData.BookingDay) {
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	if areTimePeriodsOverlapping(timeslotsData.Time) {
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	for _, timePeriod := range timeslotsData.Time {
 		if !isTimePeriodValid(timePeriod) {
-			w.WriteHeader(http.StatusInternalServerError)
+			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 	}
