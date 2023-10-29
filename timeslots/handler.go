@@ -3,12 +3,16 @@ package timeslots
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 	"timezone-converter/db"
+
+	"github.com/google/uuid"
 )
 
 type TimeslotData struct {
-	OwnerId string       `json:"ownerId"`
-	Time    []TimePeriod `json:"time"`
+	OwnerId    string       `json:"ownerId"`
+	Time       []TimePeriod `json:"time"`
+	BookingDay time.Time    `json:"BookingDay"`
 }
 
 // time payload format that works
@@ -17,23 +21,39 @@ func CreateTimeslots(w http.ResponseWriter, r *http.Request) {
 	var timeslotsData TimeslotData
 	json.NewDecoder(r.Body).Decode(&timeslotsData)
 
+	// check if BookingDay was not send
+	if timeslotsData.BookingDay.IsZero() {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	repo := NewRepository(db.DbInstance)
+
+	if !timeperiodsBelongToTheDay(timeslotsData.Time, timeslotsData.BookingDay) {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	if areTimePeriodsOverlapping(timeslotsData.Time) {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 
 	for _, timePeriod := range timeslotsData.Time {
 		if !isTimePeriodValid(timePeriod) {
+			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 	}
 
-	sortByTimeFrom(timeslotsData.Time)
+	// timeslots := []TimeslotData{timeslotsData}
+	// err := repo.createTimeslots(timeslots...)
 
 	for i := 0; i < len(timeslotsData.Time); i++ {
-		timeInUnixTo := timeslotsData.Time[i].To.Unix()
-		timeInUnixFrom := timeslotsData.Time[i].From.Unix()
 
-		t := TimeslotInDb{TimeslotBase: TimeslotBase{OwnerId: timeslotsData.OwnerId, Booked: false}, TimeFrom: timeInUnixFrom, TimeTo: timeInUnixTo}
+		t := Timeslot{TimeslotBase: TimeslotBase{Id: uuid.NewString(), OwnerId: timeslotsData.OwnerId, Booked: false}, TimeFrom: timeslotsData.Time[i].From, TimeTo: timeslotsData.Time[i].To}
 
-		err := repo.createTimeslots(t)
+		err := repo.createTimeslot(t)
 
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -48,7 +68,7 @@ func BookTimeslot(w http.ResponseWriter, r *http.Request) {
 	var data Timeslot
 	json.NewDecoder(r.Body).Decode(&data)
 
-	ts, err := repo.getTimeslot(data)
+	ts, err := repo.getTimeslotById(data.Id)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

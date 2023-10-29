@@ -6,6 +6,7 @@ import (
 )
 
 type TimeslotBase struct {
+	Id         string `json:"id"`
 	OwnerId    string `json:"ownerId"`
 	BookedById string `json:"bookedById"`
 	Booked     bool   `json:"booked"`
@@ -13,10 +14,11 @@ type TimeslotBase struct {
 
 type Timeslot struct {
 	TimeslotBase
-	Time []TimePeriod `json:"time"`
+	TimeFrom time.Time `json:"timeFrom"`
+	TimeTo   time.Time `json:"timeTo"`
 }
 
-type TimeslotInDb struct {
+type TimeslotInDB struct {
 	TimeslotBase
 	TimeFrom int64 `json:"timeFrom"`
 	TimeTo   int64 `json:"timeTo"`
@@ -31,23 +33,31 @@ func isTimePeriodValid(timeperiod TimePeriod) bool {
 	return timeperiod.From.Before(timeperiod.To)
 }
 
-func sortByTimeFrom(timeperiods []TimePeriod) {
+func areTimePeriodsOverlapping(timeperiods []TimePeriod) bool {
 	sort.Slice(timeperiods, func(i, j int) bool {
 		return timeperiods[i].From.Before(timeperiods[j].From)
 	})
+
+	prev := timeperiods[0]
+	for i := 1; i < len(timeperiods); i++ {
+		cur := timeperiods[i]
+		if !prev.To.Before(cur.From) {
+			return false
+		}
+		prev = cur
+	}
+	return true
 }
 
-func areTimePeriodsOverlapping(timeperiods []TimePeriod) bool {
+func timeperiodsBelongToTheDay(timeperiods []TimePeriod, day time.Time) bool {
+	for i := 0; i < len(timeperiods); i++ {
+		period := timeperiods[i]
+		fromBelongsToDay := period.From.Day() == day.Day() && period.From.Month() == day.Month() && period.From.Year() == day.Year()
+		toBelongsToDay := period.To.Day() == day.Day() && period.To.Month() == day.Month() && period.To.Year() == day.Year()
 
-	// sort timeperiods from earliest "from"
-
-	// check that the next "from" is bigger than the previous
-	// check that previous "to" is smaller than next "from"
-	// from 16th to 18th
-	// from 19th to 20th
-
-	// from 17th to 18th
-	// from 17th to 19th
-
-	return false
+		if !fromBelongsToDay || !toBelongsToDay {
+			return false
+		}
+	}
+	return true
 }
