@@ -3,17 +3,8 @@ package timeslots
 import (
 	"encoding/json"
 	"net/http"
-	"time"
 	"timezone-converter/db"
-
-	"github.com/google/uuid"
 )
-
-type TimeslotData struct {
-	OwnerId    string       `json:"ownerId"`
-	Time       []TimePeriod `json:"time"`
-	BookingDay time.Time    `json:"BookingDay"`
-}
 
 // time payload format that works
 // "time": [{"From": "2014-11-12T11:45:26.371Z", "To": "2017-11-12T11:45:26.371Z"}]
@@ -30,11 +21,12 @@ func CreateTimeslots(w http.ResponseWriter, r *http.Request) {
 	repo := NewRepository(db.DbInstance)
 
 	if !timeperiodsBelongToTheDay(timeslotsData.Time, timeslotsData.BookingDay) {
+
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	if areTimePeriodsOverlapping(timeslotsData.Time) {
+	if !areTimePeriodsNotOverlapping(timeslotsData.Time) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -46,26 +38,23 @@ func CreateTimeslots(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// timeslots := []TimeslotData{timeslotsData}
-	// err := repo.createTimeslots(timeslots...)
+	err := repo.createTimeslots(timeslotsData)
 
-	for i := 0; i < len(timeslotsData.Time); i++ {
-
-		t := Timeslot{TimeslotBase: TimeslotBase{Id: uuid.NewString(), OwnerId: timeslotsData.OwnerId, Booked: false}, TimeFrom: timeslotsData.Time[i].From, TimeTo: timeslotsData.Time[i].To}
-
-		err := repo.createTimeslot(t)
-
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
+}
+
+type BookTimeslotData struct {
+	Id         string `json:"id"`
+	BookedById string `json:"bookedById"`
 }
 
 func BookTimeslot(w http.ResponseWriter, r *http.Request) {
 	repo := NewRepository(db.DbInstance)
 
-	var data Timeslot
+	var data BookTimeslotData
 	json.NewDecoder(r.Body).Decode(&data)
 
 	ts, err := repo.getTimeslotById(data.Id)

@@ -2,8 +2,11 @@ package timeslots
 
 import (
 	"database/sql"
+	"errors"
 	"log"
 	"timezone-converter/db"
+
+	"github.com/google/uuid"
 )
 
 type Repository struct {
@@ -15,38 +18,79 @@ func NewRepository(db *sql.DB) *Repository {
 }
 
 func createTimeslotsTable() {
-	const create = `CREATE TABLE IF NOT EXISTS timeslots(id TEXT, ownerId TEXT, bookedById TEXT, timeFrom INTEGER, timeTo INTEGER, booked INTEGER)`
+	const create = `CREATE TABLE IF NOT EXISTS timeslots(id TEXT, ownerId TEXT, bookedById TEXT, timeFrom INTEGER, timeTo INTEGER, bookingDay INTEGER, booked INTEGER)`
 
 	if _, err := db.DbInstance.Exec(create); err != nil {
 		log.Fatal(err)
 	}
 }
 
-func (r Repository) createTimeslot(timeslot Timeslot) error {
+func insertTimeslotIntoDB(timeslot TimeslotData) error {
+	id := uuid.NewString()
+	bookingDayInUnix := timeslot.BookingDay.Unix()
+
+	for i := 0; i < len(timeslot.Time); i++ {
+		timeInUnixFrom := timeslot.Time[i].From.Unix()
+		timeInUnixTo := timeslot.Time[i].To.Unix()
+
+		t := TimeslotInDB{TimeslotBase: TimeslotBase{Id: id, OwnerId: timeslot.OwnerId, Booked: false}, TimeFrom: timeInUnixFrom, TimeTo: timeInUnixTo, BookingDay: bookingDayInUnix}
+
+		query := "INSERT INTO timeslots(id, ownerId, bookedById, timeFrom, timeTo, bookingDay, booked) values(?,?,?,?,?,?,?)"
+
+		_, err := db.DbInstance.Exec(query, t.Id, t.OwnerId, t.BookedById, t.TimeFrom, t.TimeTo, t.BookingDay, t.Booked)
+
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (r Repository) createTimeslots(timeslot TimeslotData) error {
 	createTimeslotsTable()
 
-	// for i := 0; i < len(timeslots); i++ {
-	// add id, TimeFrom, TimeTo here
-	//}
+	bookingDayInUnix := timeslot.BookingDay.Unix()
 
-	// for _, timeslot := range timeslots {
-	// somehow construct SQL query here
-	// }
+	ts, err := r.getTimeslotByBookingDay(bookingDayInUnix)
 
-	timeInUnixFrom := timeslot.TimeFrom.Unix()
-	timeInUnixTo := timeslot.TimeTo.Unix()
+	if !errors.Is(err, sql.ErrNoRows) {
+		query := "DELETE FROM timeslots WHERE BookingDay=?"
 
-	t := TimeslotInDB{TimeslotBase: TimeslotBase{Id: timeslot.Id, OwnerId: timeslot.OwnerId, Booked: false}, TimeFrom: timeInUnixFrom, TimeTo: timeInUnixTo}
+		_, err := db.DbInstance.Exec(query, ts.BookingDay)
 
-	query := "INSERT INTO timeslots(id, ownerId, bookedById, timeFrom, timeTo, booked) values(?,?,?,?,?,?)"
+		if err != nil {
+			return err
+		}
 
-	_, err := db.DbInstance.Exec(query, t.Id, t.OwnerId, t.BookedById, t.TimeFrom, t.TimeTo, t.Booked)
+		// no new variables on left side of :=compiler
+		// err := insertTimeslotIntoDB(timeslot)
 
-	if err != nil {
-		return err
+		insertTimeslotIntoDB(timeslot)
+
+	} else {
+		err := insertTimeslotIntoDB(timeslot)
+
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
+}
+
+func (r Repository) getTimeslotByBookingDay(day int64) (TimeslotInDB, error) {
+	timeslot := TimeslotInDB{}
+	query := "SELECT * FROM timeslots WHERE bookingDay=?"
+
+	row := db.DbInstance.QueryRow(query, day)
+
+	err := row.Scan(&timeslot.Id, &timeslot.OwnerId, &timeslot.BookedById, &timeslot.TimeFrom, &timeslot.TimeTo, &timeslot.BookingDay, &timeslot.Booked)
+
+	if err != nil {
+		return timeslot, err
+	}
+
+	return timeslot, nil
 }
 
 func (r Repository) getTimeslotById(id string) (TimeslotInDB, error) {
@@ -55,7 +99,7 @@ func (r Repository) getTimeslotById(id string) (TimeslotInDB, error) {
 
 	row := db.DbInstance.QueryRow(query, id)
 
-	err := row.Scan(&timeslot.Id, &timeslot.OwnerId, &timeslot.BookedById, &timeslot.TimeFrom, &timeslot.TimeTo, &timeslot.Booked)
+	err := row.Scan(&timeslot.Id, &timeslot.OwnerId, &timeslot.BookedById, &timeslot.TimeFrom, &timeslot.TimeTo, &timeslot.BookingDay, &timeslot.Booked)
 
 	if err != nil {
 		return timeslot, err
