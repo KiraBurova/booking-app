@@ -2,7 +2,6 @@ package timeslots
 
 import (
 	"database/sql"
-	"errors"
 	"log"
 	"timezone-converter/db"
 
@@ -51,21 +50,27 @@ func (r Repository) createTimeslots(timeslot TimeslotData) error {
 
 	bookingDayInUnix := timeslot.BookingDay.Unix()
 
-	ts, err := r.getTimeslotByBookingDay(bookingDayInUnix)
+	count, err := r.checkIfTimeslotByBookingDayExists(bookingDayInUnix)
 
-	if !errors.Is(err, sql.ErrNoRows) {
+	if err != nil {
+		return err
+	}
+
+	if count > 0 {
 		query := "DELETE FROM timeslots WHERE BookingDay=?"
 
-		_, err := db.DbInstance.Exec(query, ts.BookingDay)
+		_, err := db.DbInstance.Exec(query, bookingDayInUnix)
 
 		if err != nil {
 			return err
+		} else {
+
+			err := insertTimeslotIntoDB(timeslot)
+
+			if err != nil {
+				return err
+			}
 		}
-
-		// no new variables on left side of :=compiler
-		// err := insertTimeslotIntoDB(timeslot)
-
-		insertTimeslotIntoDB(timeslot)
 
 	} else {
 		err := insertTimeslotIntoDB(timeslot)
@@ -78,19 +83,19 @@ func (r Repository) createTimeslots(timeslot TimeslotData) error {
 	return nil
 }
 
-func (r Repository) getTimeslotByBookingDay(day int64) (TimeslotInDB, error) {
-	timeslot := TimeslotInDB{}
-	query := "SELECT * FROM timeslots WHERE bookingDay=?"
+func (r Repository) checkIfTimeslotByBookingDayExists(day int64) (int, error) {
+	var count int
+	query := "SELECT COUNT (*) FROM timeslots WHERE bookingDay=?"
 
-	row := db.DbInstance.QueryRow(query, day)
-
-	err := row.Scan(&timeslot.Id, &timeslot.OwnerId, &timeslot.BookedById, &timeslot.TimeFrom, &timeslot.TimeTo, &timeslot.BookingDay, &timeslot.Booked)
+	err := db.DbInstance.QueryRow(query, day).Scan(&count)
 
 	if err != nil {
-		return timeslot, err
+		return 0, err
 	}
 
-	return timeslot, nil
+	// err := row.Scan(&timeslot.Id, &timeslot.OwnerId, &timeslot.BookedById, &timeslot.TimeFrom, &timeslot.TimeTo, &timeslot.BookingDay, &timeslot.Booked)
+
+	return count, err
 }
 
 func (r Repository) getTimeslotById(id string) (TimeslotInDB, error) {
