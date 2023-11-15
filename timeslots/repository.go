@@ -93,8 +93,6 @@ func (r Repository) checkIfTimeslotByBookingDayExists(day int64) (int, error) {
 		return 0, err
 	}
 
-	// err := row.Scan(&timeslot.Id, &timeslot.OwnerId, &timeslot.BookedById, &timeslot.TimeFrom, &timeslot.TimeTo, &timeslot.BookingDay, &timeslot.Booked)
-
 	return count, err
 }
 
