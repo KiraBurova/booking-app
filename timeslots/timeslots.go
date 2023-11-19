@@ -34,7 +34,7 @@ func isTimePeriodValid(timeperiod TimePeriod) bool {
 	return timeperiod.From.Before(timeperiod.To)
 }
 
-func areTimePeriodsNotOverlapping(timeperiods []TimePeriod) bool {
+func areTimePeriodsOverlapping(timeperiods []TimePeriod) bool {
 	sort.Slice(timeperiods, func(i, j int) bool {
 		return timeperiods[i].From.Before(timeperiods[j].From)
 	})
@@ -42,12 +42,12 @@ func areTimePeriodsNotOverlapping(timeperiods []TimePeriod) bool {
 	prev := timeperiods[0]
 	for i := 1; i < len(timeperiods); i++ {
 		cur := timeperiods[i]
-		if !prev.To.Before(cur.From) {
-			return false
+		if prev.To.Before(cur.From) {
+			return true
 		}
 		prev = cur
 	}
-	return true
+	return false
 }
 
 func timeperiodsBelongToTheDay(timeperiods []TimePeriod, day time.Time) bool {

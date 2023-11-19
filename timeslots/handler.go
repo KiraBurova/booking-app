@@ -26,7 +26,7 @@ func CreateTimeslots(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !areTimePeriodsNotOverlapping(timeslotsData.Time) {
+	if areTimePeriodsOverlapping(timeslotsData.Time) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
