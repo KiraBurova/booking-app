@@ -1,13 +1,11 @@
 package timeslots
 
 import (
-	"log"
 	"timezone-converter/db"
 )
 
 func ServiceCreateTimeslots(timeslot TimeslotData) error {
 	repo := NewRepository(db.DbInstance)
-
 	bookingDayInUnix := timeslot.BookingDay.Unix()
 
 	count, err := repo.getTimeslotsCountByBookingDay(bookingDayInUnix)
@@ -27,7 +25,6 @@ func ServiceCreateTimeslots(timeslot TimeslotData) error {
 	}
 
 	err = insertTimeslotIntoDB(timeslot)
-	log.Println(err)
 
 	if err != nil {
 		return err
