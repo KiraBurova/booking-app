@@ -42,7 +42,7 @@ func areTimePeriodsOverlapping(timeperiods []TimePeriod) bool {
 	prev := timeperiods[0]
 	for i := 1; i < len(timeperiods); i++ {
 		cur := timeperiods[i]
-		if prev.To.Before(cur.From) {
+		if !prev.To.Before(cur.From) {
 			return true
 		}
 		prev = cur

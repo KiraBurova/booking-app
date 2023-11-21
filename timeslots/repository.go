@@ -48,42 +48,12 @@ func insertTimeslotIntoDB(timeslot TimeslotData) error {
 func (r Repository) createTimeslots(timeslot TimeslotData) error {
 	createTimeslotsTable()
 
-	bookingDayInUnix := timeslot.BookingDay.Unix()
+	err := ServiceCreateTimeslots(timeslot)
 
-	count, err := r.checkIfTimeslotByBookingDayExists(bookingDayInUnix)
-
-	if err != nil {
-		return err
-	}
-
-	if count > 0 {
-		query := "DELETE FROM timeslots WHERE BookingDay=?"
-
-		_, err := db.DbInstance.Exec(query, bookingDayInUnix)
-
-		if err != nil {
-			return err
-		} else {
-
-			err := insertTimeslotIntoDB(timeslot)
-
-			if err != nil {
-				return err
-			}
-		}
-
-	} else {
-		err := insertTimeslotIntoDB(timeslot)
-
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
+	return err
 }
 
-func (r Repository) checkIfTimeslotByBookingDayExists(day int64) (int, error) {
+func (r Repository) getTimeslotsCountByBookingDay(day int64) (int, error) {
 	var count int
 	query := "SELECT COUNT (*) FROM timeslots WHERE bookingDay=?"
 
