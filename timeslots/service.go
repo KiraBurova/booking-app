@@ -15,9 +15,7 @@ func ServiceCreateTimeslots(timeslot TimeslotData) error {
 	}
 
 	if count > 0 {
-		query := "DELETE FROM timeslots WHERE BookingDay=?"
-
-		_, err := db.DbInstance.Exec(query, bookingDayInUnix)
+		err := repo.deleteTimeslot(bookingDayInUnix)
 
 		if err != nil {
 			return err

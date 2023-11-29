@@ -91,3 +91,14 @@ func (r Repository) bookTimeslot(timeslot TimeslotInDB) error {
 
 	return nil
 }
+
+func (r Repository) deleteTimeslot(bookingDayInUnix int64) error {
+	query := `DELETE FROM timeslots WHERE BookingDay=?`
+	_, err := db.DbInstance.Exec(query, bookingDayInUnix)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
