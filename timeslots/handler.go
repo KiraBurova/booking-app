@@ -21,7 +21,6 @@ func CreateTimeslots(w http.ResponseWriter, r *http.Request) {
 	repo := NewRepository(db.DbInstance)
 
 	if !timeperiodsBelongToTheDay(timeslotsData.Time, timeslotsData.BookingDay) {
-
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}

@@ -34,7 +34,7 @@ func TestAreTimeslotsOverlapping(t *testing.T) {
 		testTime := []TimePeriod{t1, t2}
 		valid := areTimePeriodsOverlapping(testTime)
 
-		assert.True(t, valid)
+		assert.False(t, valid)
 	})
 	t.Run("time periods are overlapping", func(t *testing.T) {
 		now := time.Now()
@@ -46,7 +46,7 @@ func TestAreTimeslotsOverlapping(t *testing.T) {
 		testTime := []TimePeriod{t1, t2}
 		valid := areTimePeriodsOverlapping(testTime)
 
-		assert.False(t, valid)
+		assert.True(t, valid)
 	})
 	t.Run("one time period starts when previous one ends", func(t *testing.T) {
 		now := time.Now()
@@ -58,7 +58,7 @@ func TestAreTimeslotsOverlapping(t *testing.T) {
 		testTime := []TimePeriod{t1, t2}
 		valid := areTimePeriodsOverlapping(testTime)
 
-		assert.False(t, valid)
+		assert.True(t, valid)
 	})
 }
 
